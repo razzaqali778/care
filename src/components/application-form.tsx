@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+// src/components/ApplicationForm.tsx
+import { useMemo, useCallback } from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
@@ -8,7 +8,6 @@ import { useLanguage } from "@/contexts/language-context";
 import { PersonalInfoStep } from "@/components/steps/personal-info-step";
 import { FamilyFinancialStep } from "@/components/steps/family-financial-step";
 import { SituationDescriptionStep } from "@/components/steps/situation-description-step";
-
 import {
   personalInfoSchema,
   familyFinancialSchema,
@@ -16,216 +15,221 @@ import {
   fullFormSchema,
 } from "@/lib/validations";
 import { ChevronLeft, ChevronRight, Send } from "lucide-react";
+import type { SubmissionForm } from "@/types/types";
+import { useDraft, clearDraft } from "@/hooks/useDraft";
+import { localizedZodResolver } from "@/lib/localizedZodResolver";
+import type { StepKey } from "@/constants/steps";
+import { FORM_DEFAULTS, FIELDS_BY_STEP, TITLE_KEYS } from "@/constants/form";
+import { isRTL as isRTLLang } from "@/constants/lang";
+import { toast } from "@/components/ui/use-toast"; // shadcn toast
 
-export interface FormData {
-  name: string;
-  nationalId: string;
-  dateOfBirth: string;
-  gender: string;
-  address: string;
-  city: string;
-  state: string;
-  country: string;
-  phone: string;
-  email: string;
-  maritalStatus: string;
-  dependents: string;
-  employmentStatus: string;
-  monthlyIncome: string;
-  housingStatus: string;
-  financialSituation: string;
-  employmentCircumstance: string;
-  reasonForApplying: string;
-}
-
-interface ApplicationFormProps {
-  onSubmit: (data: FormData) => void;
-  initialValues?: Partial<FormData>;
+export interface ApplicationFormProps {
+  onSubmit: (data: SubmissionForm) => Promise<void> | void;
+  initialValues?: Partial<SubmissionForm>;
+  draftKey: string;
+  stepKey: StepKey;
+  stepIndex: number;
+  totalSteps: number;
+  onNext: () => void;
+  onPrev: () => void;
+  onGoToIndex: (idx: number) => void;
+  /** new: drives post-submit behavior */
+  mode?: "create" | "edit";
+  /** optional: redirect handler for create mode */
+  onRedirectToSubmissions?: () => void;
 }
 
 export function ApplicationForm({
   onSubmit,
   initialValues,
+  draftKey,
+  stepKey,
+  stepIndex,
+  totalSteps,
+  onNext,
+  onPrev,
+  mode = "create",
+  onRedirectToSubmissions,
 }: ApplicationFormProps) {
-  const [currentStep, setCurrentStep] = useState(1);
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const resolver = useMemo(() => localizedZodResolver(fullFormSchema, t), [t]);
+  const isRTL = isRTLLang(language);
 
-  const form = useForm<FormData>({
-    resolver: zodResolver(fullFormSchema),
-    defaultValues: {
-      name: "",
-      nationalId: "",
-      dateOfBirth: "",
-      gender: "",
-      address: "",
-      city: "",
-      state: "",
-      country: "",
-      phone: "",
-      email: "",
-      maritalStatus: "",
-      dependents: "",
-      employmentStatus: "",
-      monthlyIncome: "",
-      housingStatus: "",
-      financialSituation: "",
-      employmentCircumstance: "",
-      reasonForApplying: "",
-    },
-    mode: "onChange",
+  const form = useForm<SubmissionForm>({
+    resolver,
+    mode: "onSubmit",
+    reValidateMode: "onBlur",
+    shouldFocusError: true,
+    criteriaMode: "firstError",
+    defaultValues: FORM_DEFAULTS,
   });
 
-  // Prefill when editing
-  useEffect(() => {
-    if (!initialValues) return;
-    form.reset({
-      name: "",
-      nationalId: "",
-      dateOfBirth: "",
-      gender: "",
-      address: "",
-      city: "",
-      state: "",
-      country: "",
-      phone: "",
-      email: "",
-      maritalStatus: "",
-      dependents: "",
-      employmentStatus: "",
-      monthlyIncome: "",
-      housingStatus: "",
-      financialSituation: "",
-      employmentCircumstance: "",
-      reasonForApplying: "",
-      ...initialValues,
-    });
-  }, [initialValues, form]);
+  useDraft(form, draftKey, initialValues);
 
-  const validateCurrentStep = async () => {
-    const values = form.getValues();
+  const currentFields = useMemo(() => FIELDS_BY_STEP[stepKey], [stepKey]);
+
+  const validateCurrentStep = useCallback(async () => {
+    const ok = await form.trigger(currentFields as any, { shouldFocus: true });
+    if (!ok) return false;
     try {
-      if (currentStep === 1) {
-        await personalInfoSchema.parseAsync(values);
-        return true;
-      }
-      if (currentStep === 2) {
+      const values = form.getValues();
+      if (stepKey === "personal") await personalInfoSchema.parseAsync(values);
+      if (stepKey === "financial")
         await familyFinancialSchema.parseAsync(values);
-        return true;
-      }
-      if (currentStep === 3) {
+      if (stepKey === "situation")
         await situationDescriptionSchema.parseAsync(values);
-        return true;
-      }
-      return false;
+      return true;
     } catch {
       return false;
     }
-  };
+  }, [currentFields, form, stepKey]);
 
-  const nextStep = async () => {
+  const nextStep = useCallback(async () => {
     const ok = await validateCurrentStep();
-    if (ok && currentStep < 3) setCurrentStep((s) => s + 1);
-    else await form.trigger();
-  };
+    if (ok && stepIndex < totalSteps - 1) onNext();
+    else if (!ok) await form.trigger(undefined, { shouldFocus: true });
+  }, [validateCurrentStep, stepIndex, totalSteps, onNext, form]);
 
-  const prevStep = () => setCurrentStep((s) => Math.max(1, s - 1));
+  // IMPORTANT: click-driven submit; prevent native submit.
+  const handleFinalClick = useCallback(
+    () =>
+      form.handleSubmit(async (data) => {
+        if (stepIndex < totalSteps - 1) {
+          await nextStep();
+          return;
+        }
+        const ok = await form.trigger(undefined, { shouldFocus: true });
+        if (!ok) return;
 
-  const handleSubmit = async (data: FormData) => {
-    const ok = await form.trigger();
-    if (ok) onSubmit(data);
-  };
+        await Promise.resolve(onSubmit(data));
+        clearDraft(draftKey);
 
-  const renderStep = () => {
-    switch (currentStep) {
-      case 1:
-        return <PersonalInfoStep form={form} />;
-      case 2:
-        return <FamilyFinancialStep form={form} />;
-      case 3:
-        return <SituationDescriptionStep form={form} />;
-      default:
-        return null;
-    }
-  };
+        // Show localized toast. Fallback if key missing.
+        const title =
+          t(
+            mode === "edit"
+              ? "success.applicationUpdated"
+              : "success.applicationCreated"
+          ) ||
+          (mode === "edit" ? "Application updated" : "Application submitted");
+        const description =
+          t(
+            mode === "edit"
+              ? "success.stayOnPage"
+              : "success.takingYouToSubmissions"
+          ) ||
+          (mode === "edit"
+            ? "Your changes have been saved."
+            : "Taking you to your submissions...");
 
-  const getStepTitle = () => {
-    switch (currentStep) {
-      case 1:
-        return t("app.step1.title");
-      case 2:
-        return t("app.step2.title");
-      case 3:
-        return t("app.step3.title");
-      default:
-        return "";
-    }
-  };
+        toast({ title, description });
+
+        // Only redirect on create.
+        if (mode === "create" && onRedirectToSubmissions) {
+          onRedirectToSubmissions();
+        }
+      })(),
+    [
+      draftKey,
+      form,
+      mode,
+      nextStep,
+      onSubmit,
+      onRedirectToSubmissions,
+      stepIndex,
+      t,
+    ]
+  );
 
   return (
     <div className="max-w-2xl mx-auto">
-      {/* Progress indicator */}
       <div className="mb-6 sm:mb-8">
         <div className="flex items-center justify-between mb-4 px-4">
-          {[1, 2, 3].map((step) => (
+          {Array.from({ length: totalSteps }).map((_, i) => (
             <div
-              key={step}
+              key={i}
               className={`flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 text-sm sm:text-base ${
-                step <= currentStep
+                i <= stepIndex
                   ? "bg-primary border-primary text-primary-foreground"
                   : "bg-background border-border text-muted-foreground"
               }`}
             >
-              {step}
+              {i + 1}
             </div>
           ))}
         </div>
         <div className="w-full bg-muted rounded-full h-2">
           <div
             className="bg-gradient-primary h-2 rounded-full transition-all duration-300"
-            style={{ width: `${(currentStep / 3) * 100}%` }}
+            style={{ width: `${((stepIndex + 1) / totalSteps) * 100}%` }}
           />
         </div>
       </div>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)}>
+        {/* Kill native submit; use explicit clicks only */}
+        <form onSubmit={(e) => e.preventDefault()} noValidate>
           <Card className="shadow-medium">
             <CardHeader>
               <CardTitle className="text-xl sm:text-2xl text-center text-foreground px-4">
-                {getStepTitle()}
+                {t(TITLE_KEYS[stepKey])}
               </CardTitle>
             </CardHeader>
+
             <CardContent className="space-y-4 sm:space-y-6 p-4 sm:p-6">
-              {renderStep()}
+              {stepKey === "personal" && <PersonalInfoStep form={form} />}
+              {stepKey === "financial" && <FamilyFinancialStep form={form} />}
+              {stepKey === "situation" && (
+                <SituationDescriptionStep form={form} />
+              )}
 
               <div className="flex flex-col sm:flex-row justify-between pt-4 sm:pt-6 gap-3 sm:gap-4">
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={prevStep}
-                  disabled={currentStep === 1}
-                  className="flex items-center gap-2 w-full sm:w-auto"
+                  onClick={onPrev}
+                  disabled={stepIndex === 0}
+                  className={`flex items-center gap-2 w-full sm:w-auto ${
+                    isRTL ? "flex-row-reverse" : ""
+                  }`}
                 >
-                  <ChevronLeft className="h-4 w-4" />
-                  {t("app.back")}
+                  {isRTL ? (
+                    <ChevronRight className="h-4 w-4" />
+                  ) : (
+                    <ChevronLeft className="h-4 w-4" />
+                  )}
+                  <span>{t("app.back")}</span>
                 </Button>
 
-                {currentStep < 3 ? (
+                {stepIndex < totalSteps - 1 ? (
                   <Button
                     type="button"
                     onClick={nextStep}
-                    className="flex items-center gap-2 w-full sm:w-auto"
+                    className={`flex items-center gap-2 w-full sm:w-auto ${
+                      isRTL ? "flex-row-reversed" : ""
+                    }`}
                   >
-                    {t("app.next")}
-                    <ChevronRight className="h-4 w-4" />
+                    <span>{t("app.next")}</span>
+                    {isRTL ? (
+                      <ChevronLeft className="h-4 w-4" />
+                    ) : (
+                      <ChevronRight className="h-4 w-4" />
+                    )}
                   </Button>
                 ) : (
                   <Button
-                    type="submit"
-                    className="flex items-center gap-2 bg-gradient-primary w-full sm:w-auto"
+                    type="button"
+                    onClick={handleFinalClick}
+                    className={`flex items-center gap-2 bg-gradient-primary w-full sm:w-auto ${
+                      isRTL ? "flex-row-reverse" : ""
+                    }`}
                   >
-                    <Send className="h-4 w-4" />
-                    {t("app.submit")}
+                    <Send
+                      className="h-4 w-4"
+                      style={isRTL ? { transform: "scaleX(-1)" } : undefined}
+                      aria-hidden
+                    />
+                    <span>{t("app.submit")}</span>
                   </Button>
                 )}
               </div>

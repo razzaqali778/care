@@ -15,9 +15,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useLanguage } from "@/contexts/language-context";
+import type { SubmissionForm } from "@/types/types";
+import { STEP1_GENDER_OPTIONS } from "@/constants/step1";
 
 interface PersonalInfoStepProps {
-  form: UseFormReturn<any>;
+  form: UseFormReturn<SubmissionForm>;
 }
 
 export function PersonalInfoStep({ form }: PersonalInfoStepProps) {
@@ -27,7 +29,6 @@ export function PersonalInfoStep({ form }: PersonalInfoStepProps) {
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* name */}
         <FormField
           control={form.control}
           name="name"
@@ -43,7 +44,6 @@ export function PersonalInfoStep({ form }: PersonalInfoStepProps) {
             </FormItem>
           )}
         />
-        {/* nationalId */}
         <FormField
           control={form.control}
           name="nationalId"
@@ -65,7 +65,6 @@ export function PersonalInfoStep({ form }: PersonalInfoStepProps) {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* dob */}
         <FormField
           control={form.control}
           name="dateOfBirth"
@@ -81,7 +80,7 @@ export function PersonalInfoStep({ form }: PersonalInfoStepProps) {
             </FormItem>
           )}
         />
-        {/* gender (controlled Select) */}
+
         <FormField
           control={form.control}
           name="gender"
@@ -90,20 +89,24 @@ export function PersonalInfoStep({ form }: PersonalInfoStepProps) {
               <FormLabel>
                 {t("step1.gender.label")} {req}
               </FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
+              <Select
+                onValueChange={(v) => {
+                  field.onChange(v);
+                  form.trigger("gender");
+                }}
+                value={field.value}
+              >
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder={t("step1.gender.placeholder")} />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="male">{t("step1.gender.male")}</SelectItem>
-                  <SelectItem value="female">
-                    {t("step1.gender.female")}
-                  </SelectItem>
-                  <SelectItem value="other">
-                    {t("step1.gender.other")}
-                  </SelectItem>
+                  {STEP1_GENDER_OPTIONS.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {t(opt.labelKey)}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -112,7 +115,6 @@ export function PersonalInfoStep({ form }: PersonalInfoStepProps) {
         />
       </div>
 
-      {/* address */}
       <FormField
         control={form.control}
         name="address"
@@ -130,7 +132,6 @@ export function PersonalInfoStep({ form }: PersonalInfoStepProps) {
       />
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* city */}
         <FormField
           control={form.control}
           name="city"
@@ -146,7 +147,6 @@ export function PersonalInfoStep({ form }: PersonalInfoStepProps) {
             </FormItem>
           )}
         />
-        {/* state */}
         <FormField
           control={form.control}
           name="state"
@@ -162,7 +162,6 @@ export function PersonalInfoStep({ form }: PersonalInfoStepProps) {
             </FormItem>
           )}
         />
-        {/* country */}
         <FormField
           control={form.control}
           name="country"
@@ -184,7 +183,6 @@ export function PersonalInfoStep({ form }: PersonalInfoStepProps) {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* phone */}
         <FormField
           control={form.control}
           name="phone"
@@ -204,7 +202,6 @@ export function PersonalInfoStep({ form }: PersonalInfoStepProps) {
             </FormItem>
           )}
         />
-        {/* email */}
         <FormField
           control={form.control}
           name="email"

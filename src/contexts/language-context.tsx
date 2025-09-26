@@ -5,13 +5,15 @@ import React, {
   useMemo,
   useState,
 } from "react";
-import { translations, SupportedLang } from "@/i18n/translations";
-
-type LanguageContextValue = {
-  language: SupportedLang;
-  setLanguage: (lang: SupportedLang) => void;
-  t: (key: string) => string;
-};
+import { translations } from "@/i18n/translations";
+import { LanguageContextValue } from "@/types/types";
+import {
+  EN,
+  AR,
+  parseSupportedLang,
+  applyHtmlLangDir,
+  SupportedLang,
+} from "@/constants/lang";
 
 const LanguageContext = createContext<LanguageContextValue | undefined>(
   undefined
@@ -22,28 +24,27 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [language, setLanguageState] = useState<SupportedLang>(() => {
-    const saved =
-      (localStorage.getItem(STORAGE_KEY) as SupportedLang | null) || "en";
-    return saved === "ar" ? "ar" : "en";
+    const saved = localStorage.getItem(STORAGE_KEY);
+    return parseSupportedLang(saved, EN);
   });
 
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY, language);
     } catch {}
-    document.documentElement.setAttribute("lang", language);
-    document.documentElement.setAttribute("dir", "ltr");
+    applyHtmlLangDir(document, language);
   }, [language]);
 
   const t = useMemo(() => {
-    const table = translations[language];
-    const fallback = translations.en;
+    const table = translations[language] ?? {};
+    const fallback = translations[EN] ?? {};
     return (key: string) =>
       key in table ? table[key] : key in fallback ? fallback[key] : `[${key}]`;
   }, [language]);
 
   const setLanguage = (lang: SupportedLang) =>
-    setLanguageState(lang === "ar" ? "ar" : "en");
+    setLanguageState(lang === AR ? AR : EN);
+
   const value = useMemo(() => ({ language, setLanguage, t }), [language, t]);
 
   return (

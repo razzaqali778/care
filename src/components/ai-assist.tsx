@@ -13,33 +13,10 @@ import { ReloadIcon as Reload } from "@radix-ui/react-icons";
 import { PenTool, Edit3, Check, X } from "lucide-react";
 import { useLanguage } from "@/contexts/language-context";
 import { requestAiAssist } from "@/services/ai-assist";
-import type { AssistFieldKey, ApplicationState, Lang } from "@/types/types";
-
-type Step3Form = {
-  financialSituation: string;
-  employmentCircumstance: string;
-  reasonForApplying: string;
-  name?: string;
-  nationalId?: string;
-  dateOfBirth?: string;
-  gender?: string;
-  address?: string;
-  city?: string;
-  state?: string;
-  country?: string;
-  phone?: string;
-  email?: string;
-  maritalStatus?: string;
-  dependents?: string | number;
-  employmentStatus?: string;
-  monthlyIncome?: string | number;
-  housingStatus?: string;
-};
-
-const safeT = (t: (k: string) => string, k: string, fb: string) => {
-  const v = t(k);
-  return v && !v.startsWith("[") ? v : fb;
-};
+import type { ApplicationState } from "@/types/types";
+import { makeAssistLabels, type AssistTargetField } from "@/constants/assist";
+import { toApplicationState, type Step3Form } from "../utility/app-state";
+import { toApiLang, type SupportedLang } from "@/constants/lang";
 
 export function AiAssist({
   form,
@@ -47,27 +24,11 @@ export function AiAssist({
   fieldKey,
 }: {
   form: UseFormReturn<Step3Form>;
-  targetField:
-    | "financialSituation"
-    | "employmentCircumstance"
-    | "reasonForApplying";
-  fieldKey: AssistFieldKey;
+  targetField: AssistTargetField;
+  fieldKey: keyof ApplicationState["situation"];
 }) {
   const { t, language } = useLanguage();
-  const labels = React.useMemo(
-    () => ({
-      help: safeT(t, "assist.help", t("common.helpWrite")),
-      generating: safeT(t, "assist.generating", "Generating…"),
-      insert: safeT(t, "assist.insert", "Insert"),
-      edit: safeT(t, "assist.edit", "Edit"),
-      done: safeT(t, "assist.done", "Done"),
-      discard: safeT(t, "assist.discard", "Discard"),
-      regenerate: safeT(t, "assist.regenerate", "Regenerate"),
-      suggestion: safeT(t, "assist.suggestion", "Suggestion"),
-      error: safeT(t, "assist.error", "Could not generate a suggestion."),
-    }),
-    [t]
-  );
+  const labels = React.useMemo(() => makeAssistLabels(t), [t]);
 
   const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
@@ -75,45 +36,16 @@ export function AiAssist({
   const [editable, setEditable] = React.useState(false);
   const [err, setErr] = React.useState<string | null>(null);
 
-  const lang: Lang = language === "ar" ? "ar" : "en";
-
-  function buildAppState(): ApplicationState {
-    const v = form.getValues();
-    return {
-      personal: {
-        name: v.name || "",
-        nationalId: v.nationalId || "",
-        dob: v.dateOfBirth || "",
-        gender: v.gender || "",
-        address: v.address || "",
-        city: v.city || "",
-        state: v.state || "",
-        country: v.country || "",
-        phone: v.phone || "",
-        email: v.email || "",
-      },
-      family: {
-        maritalStatus: v.maritalStatus || "",
-        dependents: Number(v.dependents ?? 0) || 0,
-        employmentStatus: v.employmentStatus || "",
-        monthlyIncome: Number(v.monthlyIncome ?? 0) || 0,
-        housingStatus: v.housingStatus || "",
-      },
-      situation: {
-        currentFinancialSituation: v.financialSituation || "",
-        employmentCircumstances: v.employmentCircumstance || "",
-        reasonForApplying: v.reasonForApplying || "",
-      },
-    };
-  }
+  // API expects "en" | "ar"
+  const lang = toApiLang(language as SupportedLang);
 
   const generate = async (seed?: string) => {
     setErr(null);
     setLoading(true);
     try {
       const draft = await requestAiAssist({
-        fieldKey,
-        application: buildAppState(),
+        fieldKey, // server-side key
+        application: toApplicationState(form.getValues()),
         language: lang,
         sourceText: seed && seed.trim() ? seed : undefined,
       });

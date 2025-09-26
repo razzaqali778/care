@@ -1,4 +1,3 @@
-import { UseFormReturn } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import {
   FormField,
@@ -15,10 +14,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useLanguage } from "@/contexts/language-context";
-
-interface FamilyFinancialStepProps {
-  form: UseFormReturn<any>;
-}
+import type { FamilyFinancialStepProps } from "@/types/types";
+import {
+  STEP2_MARITAL_STATUS,
+  STEP2_EMPLOYMENT_STATUS,
+  STEP2_HOUSING_STATUS,
+} from "@/constants/step2";
 
 export function FamilyFinancialStep({ form }: FamilyFinancialStepProps) {
   const { t } = useLanguage();
@@ -35,7 +36,13 @@ export function FamilyFinancialStep({ form }: FamilyFinancialStepProps) {
               <FormLabel>
                 {t("step2.maritalStatus.label")} {req}
               </FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
+              <Select
+                onValueChange={(v) => {
+                  field.onChange(v);
+                  form.trigger("maritalStatus");
+                }}
+                value={field.value}
+              >
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue
@@ -44,21 +51,11 @@ export function FamilyFinancialStep({ form }: FamilyFinancialStepProps) {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="single">
-                    {t("step2.maritalStatus.single")}
-                  </SelectItem>
-                  <SelectItem value="married">
-                    {t("step2.maritalStatus.married")}
-                  </SelectItem>
-                  <SelectItem value="divorced">
-                    {t("step2.maritalStatus.divorced")}
-                  </SelectItem>
-                  <SelectItem value="widowed">
-                    {t("step2.maritalStatus.widowed")}
-                  </SelectItem>
-                  <SelectItem value="separated">
-                    {t("step2.maritalStatus.separated")}
-                  </SelectItem>
+                  {STEP2_MARITAL_STATUS.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {t(opt.labelKey)}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -95,7 +92,13 @@ export function FamilyFinancialStep({ form }: FamilyFinancialStepProps) {
               <FormLabel>
                 {t("step2.employmentStatus.label")} {req}
               </FormLabel>
-              <Select onValueChange={field.onChange} value={field.value}>
+              <Select
+                onValueChange={(v) => {
+                  field.onChange(v);
+                  form.trigger("employmentStatus");
+                }}
+                value={field.value}
+              >
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue
@@ -104,30 +107,11 @@ export function FamilyFinancialStep({ form }: FamilyFinancialStepProps) {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="employed-full-time">
-                    {t("step2.employmentStatus.employedFull")}
-                  </SelectItem>
-                  <SelectItem value="employed-part-time">
-                    {t("step2.employmentStatus.employedPart")}
-                  </SelectItem>
-                  <SelectItem value="self-employed">
-                    {t("step2.employmentStatus.selfEmployed")}
-                  </SelectItem>
-                  <SelectItem value="unemployed">
-                    {t("step2.employmentStatus.unemployed")}
-                  </SelectItem>
-                  <SelectItem value="retired">
-                    {t("step2.employmentStatus.retired")}
-                  </SelectItem>
-                  <SelectItem value="student">
-                    {t("step2.employmentStatus.student")}
-                  </SelectItem>
-                  <SelectItem value="disabled">
-                    {t("step2.employmentStatus.disabled")}
-                  </SelectItem>
-                  <SelectItem value="other">
-                    {t("step2.employmentStatus.other")}
-                  </SelectItem>
+                  {STEP2_EMPLOYMENT_STATUS.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      {t(opt.labelKey)}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -164,7 +148,13 @@ export function FamilyFinancialStep({ form }: FamilyFinancialStepProps) {
             <FormLabel>
               {t("step2.housingStatus.label")} {req}
             </FormLabel>
-            <Select onValueChange={field.onChange} value={field.value}>
+            <Select
+              onValueChange={(v) => {
+                field.onChange(v);
+                form.trigger("housingStatus");
+              }}
+              value={field.value}
+            >
               <FormControl>
                 <SelectTrigger>
                   <SelectValue
@@ -173,24 +163,11 @@ export function FamilyFinancialStep({ form }: FamilyFinancialStepProps) {
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                <SelectItem value="own-home">
-                  {t("step2.housingStatus.ownHome")}
-                </SelectItem>
-                <SelectItem value="rent">
-                  {t("step2.housingStatus.rent")}
-                </SelectItem>
-                <SelectItem value="living-with-family">
-                  {t("step2.housingStatus.livingWithFamily")}
-                </SelectItem>
-                <SelectItem value="temporary-housing">
-                  {t("step2.housingStatus.temporaryHousing")}
-                </SelectItem>
-                <SelectItem value="homeless">
-                  {t("step2.housingStatus.homeless")}
-                </SelectItem>
-                <SelectItem value="other">
-                  {t("step2.housingStatus.other")}
-                </SelectItem>
+                {STEP2_HOUSING_STATUS.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value}>
+                    {t(opt.labelKey)}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
             <FormMessage />

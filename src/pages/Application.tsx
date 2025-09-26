@@ -4,114 +4,102 @@ import { Header } from "@/components/header";
 import { ApplicationForm } from "@/components/application-form";
 import { useToast } from "@/hooks/use-toast";
 import { useLanguage } from "@/contexts/language-context";
-import type { Submission } from "@/types/types";
-
-function toDateInput(v?: string) {
-  if (!v) return "";
-
-  const d = v.includes("T") ? v.slice(0, 10) : v;
-  return /^\d{4}-\d{2}-\d{2}$/.test(d) ? d : "";
-}
-
-function normalizeInitialValues(r: Submission | undefined) {
-  if (!r) return undefined;
-  const {
-    id: _id,
-    submittedAt: _submittedAt,
-    updatedAt: _updatedAt,
-    ...rest
-  } = r as any;
-
-  return {
-    name: rest.name ?? "",
-    nationalId: rest.nationalId ?? "",
-    dateOfBirth: toDateInput(rest.dateOfBirth),
-    gender: rest.gender ?? "",
-    address: rest.address ?? "",
-    city: rest.city ?? "",
-    state: rest.state ?? "",
-    country: rest.country ?? "",
-    phone: rest.phone ?? "",
-    email: rest.email ?? "",
-    maritalStatus: rest.maritalStatus ?? "",
-    dependents: String(rest.dependents ?? ""),
-    employmentStatus: rest.employmentStatus ?? "",
-    monthlyIncome: String(rest.monthlyIncome ?? ""),
-    housingStatus: rest.housingStatus ?? "",
-    financialSituation: rest.financialSituation ?? "",
-    employmentCircumstance: rest.employmentCircumstance ?? "",
-    reasonForApplying: rest.reasonForApplying ?? "",
-  };
-}
+import { api } from "@/lib/api";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  STEPS,
+  type StepKey,
+  isStep,
+  DRAFT_PREFIX,
+  routes,
+  I18N_KEYS,
+} from "@/constants/application";
+import { normalizeInitialValues } from "../utility/submission";
 
 export default function Application() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { t } = useLanguage();
-  const { id } = useParams<{ id?: string }>();
+  const { id, step } = useParams<{ id?: string; step?: string }>();
 
-  const allSubmissions: Submission[] = useMemo(() => {
-    try {
-      return JSON.parse(localStorage.getItem("submissions") || "[]");
-    } catch {
-      return [];
-    }
-  }, []);
-
-  const record = useMemo(
-    () => (id ? allSubmissions.find((s) => s.id === id) : undefined),
-    [id, allSubmissions]
-  );
+  const stepKey: StepKey = isStep(step) ? (step as StepKey) : "personal";
+  const stepIndex = STEPS.indexOf(stepKey);
+  const totalSteps = STEPS.length;
 
   useEffect(() => {
-    if (id && !record) {
-      toast({
-        title: "Not found",
-        description: "The submission you tried to edit does not exist.",
+    if (!isStep(step))
+      navigate(routes.application((id ?? "new") as "new", "personal"), {
+        replace: true,
       });
-      navigate("/submissions", { replace: true });
+  }, [step, id, navigate]);
+
+  const draftKey = `${DRAFT_PREFIX}${id ?? "new"}`;
+  const qc = useQueryClient();
+
+  const { data: record, isLoading } = useQuery({
+    queryKey: ["submission", id],
+    queryFn: () => (id ? api.get(id) : Promise.resolve(undefined)),
+    enabled: !!id,
+  });
+
+  useEffect(() => {
+    if (id && !isLoading && record === undefined) {
+      toast({
+        title: t(I18N_KEYS.notFoundTitle) || "Not found",
+        description:
+          t(I18N_KEYS.notFoundDesc) ||
+          "The submission you tried to edit does not exist.",
+      });
+      navigate(routes.submissions, { replace: true });
     }
-  }, [id, record, toast, navigate]);
+  }, [id, isLoading, record, toast, navigate, t]);
 
   const initialValues = useMemo(() => normalizeInitialValues(record), [record]);
 
-  const handleSubmit = (formData: any) => {
-    const existing: Submission[] = [...allSubmissions];
+  const qcInvalidate = () =>
+    qc.invalidateQueries({ queryKey: ["submissions"] });
 
-    if (id && record) {
-      const idx = existing.findIndex((s) => s.id === id);
-      if (idx >= 0) {
-        existing[idx] = {
-          ...existing[idx],
-          ...formData,
-          id,
-          submittedAt: existing[idx].submittedAt,
-          updatedAt: new Date().toISOString(),
-        };
-        localStorage.setItem("submissions", JSON.stringify(existing));
-        toast({
-          title: t("success.applicationUpdated") || "Application updated",
-          description: t("success.redirecting"),
-        });
-      }
-    } else {
-      const newSubmission: Submission = {
-        id: Date.now().toString(),
-        ...formData,
-        submittedAt: new Date().toISOString(),
-      };
-      localStorage.setItem(
-        "submissions",
-        JSON.stringify([...existing, newSubmission])
-      );
+  const mutateCreate = useMutation({
+    mutationFn: api.create,
+    onSuccess: () => {
+      localStorage.removeItem(draftKey);
+      qcInvalidate();
       toast({
-        title: t("success.applicationSubmitted"),
-        description: t("success.redirecting"),
+        title: t(I18N_KEYS.successSubmittedTitle),
+        description: t(I18N_KEYS.successRedirecting),
       });
-    }
+      navigate(routes.submissions);
+    },
+  });
 
-    setTimeout(() => navigate("/submissions"), 2000);
+  const mutateUpdate = useMutation({
+    mutationFn: ({ id, payload }: { id: string; payload: any }) =>
+      api.update(id, payload),
+    onSuccess: () => {
+      localStorage.removeItem(draftKey);
+      qcInvalidate();
+      toast({
+        title: t(I18N_KEYS.successUpdatedTitle) || "Application updated",
+        description: t(I18N_KEYS.successRedirecting),
+      });
+      navigate(routes.submissions);
+    },
+  });
+
+  const handleSubmit = (formData: any) => {
+    if (id) mutateUpdate.mutate({ id, payload: formData });
+    else mutateCreate.mutate(formData);
   };
+
+  const goTo = (idx: number) =>
+    navigate(
+      routes.application(
+        (id ?? "new") as "new",
+        STEPS[Math.min(Math.max(0, idx), totalSteps - 1)]
+      )
+    );
+  const next = () => goTo(stepIndex + 1);
+  const prev = () => goTo(stepIndex - 1);
 
   return (
     <div className="min-h-screen bg-gradient-subtle">
@@ -126,6 +114,13 @@ export default function Application() {
         <ApplicationForm
           onSubmit={handleSubmit}
           initialValues={initialValues}
+          draftKey={draftKey}
+          stepKey={stepKey}
+          stepIndex={stepIndex}
+          totalSteps={totalSteps}
+          onNext={next}
+          onPrev={prev}
+          onGoToIndex={goTo}
         />
       </main>
     </div>

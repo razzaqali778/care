@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useCallback } from "react";
 import { Header } from "@/components/header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,64 +12,48 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/contexts/language-context";
-import { Eye, FileText, ArrowLeft, Pencil, Trash2 } from "lucide-react";
+import { FileText, ArrowLeft, Pencil, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { Submission } from "@/types/types";
 import { useToast } from "@/hooks/use-toast";
+import { api } from "@/lib/api";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 export default function Submissions() {
-  const [submissions, setSubmissions] = useState<Submission[]>([]);
   const navigate = useNavigate();
   const { t } = useLanguage();
   const { toast } = useToast();
+  const qc = useQueryClient();
 
-  useEffect(() => {
-    const storedSubmissions = JSON.parse(
-      localStorage.getItem("submissions") || "[]"
-    );
-    setSubmissions(storedSubmissions);
-  }, []);
+  const { data: submissions = [] } = useQuery({
+    queryKey: ["submissions"],
+    queryFn: api.list,
+  });
 
-  const persist = (list: Submission[]) => {
-    localStorage.setItem("submissions", JSON.stringify(list));
-    setSubmissions(list);
-  };
-
-  const handleEdit = useCallback(
-    (id: string) => navigate(`/application/${id}`),
-    [navigate]
-  );
-
-  const handleDelete = useCallback(
-    (id: string) => {
-      // Minimal confirmation; replace with Dialog if desired
-      if (!confirm("Delete this submission? This cannot be undone.")) return;
-      const next = submissions.filter((s) => s.id !== id);
-      persist(next);
+  const remove = useMutation({
+    mutationFn: api.remove,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["submissions"] });
       toast({ title: "Deleted", description: "The submission was removed." });
     },
-    [submissions, toast]
+  });
+
+  const handleEdit = useCallback(
+    (id: string) => navigate(`/application/${id}/personal`),
+    [navigate]
+  );
+  const handleDelete = useCallback(
+    (id: string) => {
+      if (!confirm("Delete this submission? This cannot be undone.")) return;
+      remove.mutate(id);
+    },
+    [remove]
   );
 
-  const formatDate = (dateString: string) => {
-    const d = new Date(dateString);
-    if (Number.isNaN(d.getTime())) return "-";
-    return d.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
-
-  const truncateText = (text: string, maxLength: number = 50) =>
-    text.length > maxLength ? text.substring(0, maxLength) + "..." : text;
+  const rows = submissions.map(api.toRow);
 
   return (
     <div className="min-h-screen bg-gradient-subtle">
       <Header />
-
       <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         <div className="mb-6">
           <Button
@@ -77,10 +61,8 @@ export default function Submissions() {
             onClick={() => navigate("/")}
             className="flex items-center gap-2 mb-4 w-full sm:w-auto"
           >
-            <ArrowLeft className="h-4 w-4" />
-            {t("submissions.backToHome")}
+            <ArrowLeft className="h-4 w-4" /> {t("submissions.backToHome")}
           </Button>
-
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">
@@ -94,7 +76,7 @@ export default function Submissions() {
               variant="secondary"
               className="text-sm sm:text-lg px-3 sm:px-4 py-1 sm:py-2 self-start sm:self-auto"
             >
-              {submissions.length} {t("submissions.title")}
+              {rows.length} {t("submissions.title")}
             </Badge>
           </div>
         </div>
@@ -102,12 +84,11 @@ export default function Submissions() {
         <Card className="shadow-medium">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
-              <FileText className="h-5 w-5" />
-              {t("submissions.title")}
+              <FileText className="h-5 w-5" /> {t("submissions.title")}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {submissions.length === 0 ? (
+            {rows.length === 0 ? (
               <div className="text-center py-8 sm:py-12">
                 <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                 <h3 className="text-lg font-semibold text-foreground mb-2">
@@ -117,7 +98,7 @@ export default function Submissions() {
                   {t("submissions.getStarted")}
                 </p>
                 <Button
-                  onClick={() => navigate("/application")}
+                  onClick={() => navigate("/application/new/personal")}
                   variant="outline"
                   className="w-full sm:w-auto"
                 >
@@ -149,48 +130,32 @@ export default function Submissions() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {submissions.map((submission) => (
-                      <TableRow key={submission.id}>
+                    {rows.map((r) => (
+                      <TableRow key={r.id}>
                         <TableCell className="font-mono text-sm">
-                          #{submission.id.slice(-6)}
+                          {r.idTail}
                         </TableCell>
-                        <TableCell className="font-medium">
-                          {submission.name}
-                        </TableCell>
-                        <TableCell>{submission.nationalId}</TableCell>
-                        <TableCell className="break-all">
-                          {submission.email}
-                        </TableCell>
+                        <TableCell className="font-medium">{r.name}</TableCell>
+                        <TableCell>{r.nationalId}</TableCell>
+                        <TableCell className="break-all">{r.email}</TableCell>
                         <TableCell className="max-w-xs">
                           <span
-                            title={submission.reasonForApplying}
+                            title={r.reasonShort}
                             className="block truncate"
                           >
-                            {truncateText(submission.reasonForApplying)}
+                            {r.reasonShort}
                           </span>
                         </TableCell>
                         <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
-                          {formatDate(submission.submittedAt)}
+                          {r.submittedAtFmt}
                         </TableCell>
                         <TableCell className="whitespace-nowrap">
                           <div className="flex gap-1">
-                            {/* <Button
-                              variant="ghost"
-                              size="sm"
-                              className="flex items-center gap-1"
-                              onClick={() =>
-                                alert(JSON.stringify(submission, null, 2))
-                              }
-                              title="View details"
-                            >
-                              <Eye className="h-4 w-4" />
-                              <span className="hidden sm:inline">View</span>
-                            </Button> */}
                             <Button
                               variant="ghost"
                               size="sm"
                               className="flex items-center gap-1"
-                              onClick={() => handleEdit(submission.id)}
+                              onClick={() => handleEdit(r.id)}
                               title="Edit"
                             >
                               <Pencil className="h-4 w-4" />
@@ -200,7 +165,7 @@ export default function Submissions() {
                               variant="ghost"
                               size="sm"
                               className="flex items-center gap-1 text-destructive"
-                              onClick={() => handleDelete(submission.id)}
+                              onClick={() => handleDelete(r.id)}
                               title="Delete"
                             >
                               <Trash2 className="h-4 w-4" />
