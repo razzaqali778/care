@@ -1,4 +1,4 @@
-import type { Submission, SubmissionForm, SubmissionRow } from "@/types/types";
+import type { Submission, SubmissionForm, SubmissionRow } from "@/types/Types";
 
 const KEY = "submissions";
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));

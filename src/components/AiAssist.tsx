@@ -11,11 +11,11 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { ReloadIcon as Reload } from "@radix-ui/react-icons";
 import { PenTool, Edit3, Check, X } from "lucide-react";
-import { useLanguage } from "@/contexts/language-context";
-import { requestAiAssist } from "@/services/ai-assist";
-import type { ApplicationState } from "@/types/types";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { requestAiAssist } from "@/services/Aiassist";
+import type { ApplicationState } from "@/types/Types";
 import { makeAssistLabels, type AssistTargetField } from "@/constants/assist";
-import { toApplicationState, type Step3Form } from "../utility/app-state";
+import { toApplicationState, type Step3Form } from "../utility/AppState";
 import { toApiLang, type SupportedLang } from "@/constants/lang";
 
 export function AiAssist({

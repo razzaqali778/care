@@ -1,10 +1,10 @@
 import { useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Header } from "@/components/header";
-import { ApplicationForm } from "@/components/application-form";
-import { useToast } from "@/hooks/use-toast";
-import { useLanguage } from "@/contexts/language-context";
-import { api } from "@/lib/api";
+import { Header } from "@/components/Header";
+import { ApplicationForm } from "@/components/ApplicationForm";
+import { useToast } from "@/hooks/useToast";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { api } from "@/lib/Api";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   STEPS,
@@ -14,7 +14,7 @@ import {
   routes,
   I18N_KEYS,
 } from "@/constants/application";
-import { normalizeInitialValues } from "../utility/submission";
+import { normalizeInitialValues } from "../utility/Submission";
 
 export default function Application() {
   const navigate = useNavigate();

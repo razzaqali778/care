@@ -1,4 +1,4 @@
-import type { Submission } from "@/types/types";
+import type { Submission } from "@/types/Types";
 
 export function toDateInput(v?: string) {
   if (!v) return "";

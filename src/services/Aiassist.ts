@@ -1,5 +1,5 @@
-import type { Lang } from "@/types/types";
-import type { ApplicationState, ChatMessage } from "@/types/types";
+import type { Lang } from "@/types/Types";
+import type { ApplicationState, ChatMessage } from "@/types/Types";
 import {
   OPENAI_CHAT_URL,
   OPENAI_API_KEY,
@@ -14,7 +14,7 @@ import {
   systemPrompt,
   systemTranslatePrompt,
   userTranslatePrompt,
-} from "@/utility/prompts";
+} from "@/utility/Prompts";
 import {
   EMPLOYMENT_STATUS_LABELS_EN,
   EMPLOYMENT_STATUS_LABELS_AR,

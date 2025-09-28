@@ -1,13 +1,13 @@
 import { useNavigate } from "react-router-dom";
-import { Header } from "@/components/header";
+import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useLanguage } from "@/contexts/language-context";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { ChevronRight, ChevronLeft, FileText } from "lucide-react";
 import { routes } from "@/constants/application";
 import { LANDING } from "@/constants/landing";
-import { iconSpacing } from "@/utility/rtl";
+import { iconSpacing } from "@/utility/Rtl";
 import { isRTL as isRTLLang } from "@/constants/lang";
 
 const Index = () => {

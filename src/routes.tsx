@@ -1,6 +1,6 @@
 import React, { Suspense, lazy } from "react";
 import { createBrowserRouter, Navigate } from "react-router-dom";
-import { ErrorBoundary } from "@/shared/error-boundary";
+import { ErrorBoundary } from "@/shared/ErrorBoundary";
 
 const Index = lazy(() => import("@/pages/Index"));
 const Application = lazy(() => import("@/pages/Application"));

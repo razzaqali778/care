@@ -5,8 +5,8 @@ import React, {
   useMemo,
   useState,
 } from "react";
-import { translations } from "@/i18n/translations";
-import { LanguageContextValue } from "@/types/types";
+import { translations } from "@/i18n/Translations";
+import { LanguageContextValue } from "@/types/Types";
 import {
   EN,
   AR,

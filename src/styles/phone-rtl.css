@@ -1,0 +1,34 @@
+.rtl-phone .react-intl-input,
+.rtl-phone input.react-international-phone-input {
+  direction: ltr !important;
+  text-align: left !important;
+}
+
+/* Anchor dropdown to the right of the input in RTL */
+.rtl-phone .react-intl-dropdown,
+.rtl-phone .react-international-phone__country-selector-dropdown,
+.rtl-phone .react-international-phone__country-list {
+  left: auto !important;
+  right: 0 !important;
+  transform: none !important; /* cancel any translateX from lib */
+  transform-origin: top right !important;
+}
+
+/* Ensure visibility & sane size on mobile */
+.rtl-phone .react-intl-dropdown,
+.rtl-phone .react-international-phone__country-selector-dropdown {
+  max-height: 150px !important;
+  overflow: auto !important;
+  z-index: 60 !important;
+}
+
+/* Optional: flip chevron in RTL */
+.rtl-phone .react-international-phone__dropdown-arrow {
+  transform: scaleX(-1);
+}
+.react-international-phone-country-selector-dropdown {
+  right: 0;
+}
+.react-international-phone-country-selector-dropdown {
+  max-height: 100px;
+}

@@ -6,11 +6,11 @@ import {
   FormControl,
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
-import { AiAssist } from "@/components/ai-assist";
+import { AiAssist } from "@/components/AiAssist";
 import { STEP3_COPY, type Step3Field } from "@/constants/step3";
-import { getFieldError } from "@/utility/form-errors";
+import { getFieldError } from "@/utility/FormError";
 
-type Props<T extends Record<string, any>> = {
+type Step3FieldBlockProps<T extends Record<string, any>> = {
   form: UseFormReturn<T>;
   field: Step3Field;
   t: (k: string) => string;
@@ -24,7 +24,7 @@ export function Step3FieldBlock<T extends Record<string, any>>({
   t,
   reqMark,
   onTouch,
-}: Props<T>) {
+}: Step3FieldBlockProps<T>) {
   const copy = STEP3_COPY[field];
   const error = getFieldError(form as any, field as any);
 

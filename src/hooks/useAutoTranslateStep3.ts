@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import type { UseFormReturn } from "react-hook-form";
 import type { ApiLang } from "@/constants/lang";
-import type { ApplicationState } from "@/types/types";
+import type { ApplicationState } from "@/types/Types";
 import type { Step3Field } from "@/constants/step3";
-import { needsTranslation } from "@/utility/text";
+import { needsTranslation } from "@/utility/Text";
 
 export function useAutoTranslateStep3<T extends Record<string, any>>(
   form: UseFormReturn<T>,

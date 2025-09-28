@@ -1,4 +1,4 @@
-import { UiField, UiLang } from "@/types/types";
+import { UiField, UiLang } from "@/types/Types";
 
 const FORCE_LTR = new Set<UiField>([
   "email",

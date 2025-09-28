@@ -1,0 +1,293 @@
+[
+  {
+    "code": "SA",
+    "names": { "en": "Saudi Arabia", "ar": "المملكة العربية السعودية" },
+    "states": [
+      {
+        "code": "01",
+        "names": { "en": "Riyadh Region", "ar": "منطقة الرياض" },
+        "cities": [
+          { "code": "RUH", "names": { "en": "Riyadh", "ar": "الرياض" } },
+          { "code": "KHH", "names": { "en": "Al Kharj", "ar": "الخرج" } },
+          { "code": "MJH", "names": { "en": "Al Majma'ah", "ar": "المجمعة" } }
+        ]
+      },
+      {
+        "code": "02",
+        "names": { "en": "Makkah Region", "ar": "منطقة مكة المكرمة" },
+        "cities": [
+          { "code": "JED", "names": { "en": "Jeddah", "ar": "جدة" } },
+          { "code": "MEK", "names": { "en": "Makkah", "ar": "مكة" } },
+          { "code": "TIF", "names": { "en": "Taif", "ar": "الطائف" } }
+        ]
+      }
+    ]
+  },
+  {
+    "code": "AE",
+    "names": { "en": "United Arab Emirates", "ar": "الإمارات العربية المتحدة" },
+    "states": [
+      {
+        "code": "AZ",
+        "names": { "en": "Abu Dhabi", "ar": "أبو ظبي" },
+        "cities": [
+          { "code": "AUH", "names": { "en": "Abu Dhabi", "ar": "أبو ظبي" } },
+          { "code": "ALN", "names": { "en": "Al Ain", "ar": "العين" } }
+        ]
+      },
+      {
+        "code": "DU",
+        "names": { "en": "Dubai", "ar": "دبي" },
+        "cities": [{ "code": "DXB", "names": { "en": "Dubai", "ar": "دبي" } }]
+      }
+    ]
+  },
+  {
+    "code": "EG",
+    "names": { "en": "Egypt", "ar": "مصر" },
+    "states": [
+      {
+        "code": "C",
+        "names": { "en": "Cairo", "ar": "القاهرة" },
+        "cities": [
+          { "code": "CAI", "names": { "en": "Cairo", "ar": "القاهرة" } }
+        ]
+      },
+      {
+        "code": "GZ",
+        "names": { "en": "Giza", "ar": "الجيزة" },
+        "cities": [{ "code": "GIZ", "names": { "en": "Giza", "ar": "الجيزة" } }]
+      }
+    ]
+  },
+  {
+    "code": "US",
+    "names": { "en": "United States", "ar": "الولايات المتحدة" },
+    "states": [
+      {
+        "code": "CA",
+        "names": { "en": "California", "ar": "كاليفورنيا" },
+        "cities": [
+          {
+            "code": "LAX",
+            "names": { "en": "Los Angeles", "ar": "لوس أنجلوس" }
+          },
+          {
+            "code": "SFO",
+            "names": { "en": "San Francisco", "ar": "سان فرانسيسكو" }
+          }
+        ]
+      },
+      {
+        "code": "NY",
+        "names": { "en": "New York", "ar": "نيويورك" },
+        "cities": [
+          {
+            "code": "NYC",
+            "names": { "en": "New York City", "ar": "مدينة نيويورك" }
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "code": "GB",
+    "names": { "en": "United Kingdom", "ar": "المملكة المتحدة" },
+    "states": [
+      {
+        "code": "ENG",
+        "names": { "en": "England", "ar": "إنجلترا" },
+        "cities": [
+          { "code": "LON", "names": { "en": "London", "ar": "لندن" } },
+          { "code": "MAN", "names": { "en": "Manchester", "ar": "مانشستر" } }
+        ]
+      }
+    ]
+  },
+  {
+    "code": "FR",
+    "names": { "en": "France", "ar": "فرنسا" },
+    "states": [
+      {
+        "code": "IDF",
+        "names": { "en": "Île-de-France", "ar": "إيل دو فرانس" },
+        "cities": [{ "code": "PAR", "names": { "en": "Paris", "ar": "باريس" } }]
+      }
+    ]
+  },
+  {
+    "code": "DE",
+    "names": { "en": "Germany", "ar": "ألمانيا" },
+    "states": [
+      {
+        "code": "BE",
+        "names": { "en": "Berlin", "ar": "برلين" },
+        "cities": [
+          { "code": "BER", "names": { "en": "Berlin", "ar": "برلين" } }
+        ]
+      }
+    ]
+  },
+  {
+    "code": "IN",
+    "names": { "en": "India", "ar": "الهند" },
+    "states": [
+      {
+        "code": "DL",
+        "names": { "en": "Delhi", "ar": "دلهي" },
+        "cities": [
+          { "code": "DEL", "names": { "en": "New Delhi", "ar": "نيودلهي" } }
+        ]
+      },
+      {
+        "code": "MH",
+        "names": { "en": "Maharashtra", "ar": "ماهاراشترا" },
+        "cities": [
+          { "code": "BOM", "names": { "en": "Mumbai", "ar": "مومباي" } }
+        ]
+      }
+    ]
+  },
+  {
+    "code": "CN",
+    "names": { "en": "China", "ar": "الصين" },
+    "states": [
+      {
+        "code": "BJ",
+        "names": { "en": "Beijing", "ar": "بكين" },
+        "cities": [
+          { "code": "PEK", "names": { "en": "Beijing", "ar": "بكين" } }
+        ]
+      }
+    ]
+  },
+  {
+    "code": "JP",
+    "names": { "en": "Japan", "ar": "اليابان" },
+    "states": [
+      {
+        "code": "13",
+        "names": { "en": "Tokyo", "ar": "طوكيو" },
+        "cities": [{ "code": "TYO", "names": { "en": "Tokyo", "ar": "طوكيو" } }]
+      }
+    ]
+  },
+  {
+    "code": "CA",
+    "names": { "en": "Canada", "ar": "كندا" },
+    "states": [
+      {
+        "code": "ON",
+        "names": { "en": "Ontario", "ar": "أونتاريو" },
+        "cities": [
+          { "code": "TOR", "names": { "en": "Toronto", "ar": "تورنتو" } }
+        ]
+      }
+    ]
+  },
+  {
+    "code": "AU",
+    "names": { "en": "Australia", "ar": "أستراليا" },
+    "states": [
+      {
+        "code": "NSW",
+        "names": { "en": "New South Wales", "ar": "نيو ساوث ويلز" },
+        "cities": [
+          { "code": "SYD", "names": { "en": "Sydney", "ar": "سيدني" } }
+        ]
+      }
+    ]
+  },
+  {
+    "code": "BR",
+    "names": { "en": "Brazil", "ar": "البرازيل" },
+    "states": [
+      {
+        "code": "SP",
+        "names": { "en": "São Paulo", "ar": "ساو باولو" },
+        "cities": [
+          { "code": "SAO", "names": { "en": "São Paulo", "ar": "ساو باولو" } }
+        ]
+      }
+    ]
+  },
+  {
+    "code": "RU",
+    "names": { "en": "Russia", "ar": "روسيا" },
+    "states": [
+      {
+        "code": "MOW",
+        "names": { "en": "Moscow", "ar": "موسكو" },
+        "cities": [
+          { "code": "MOW", "names": { "en": "Moscow", "ar": "موسكو" } }
+        ]
+      }
+    ]
+  },
+  {
+    "code": "TR",
+    "names": { "en": "Turkey", "ar": "تركيا" },
+    "states": [
+      {
+        "code": "34",
+        "names": { "en": "Istanbul", "ar": "إسطنبول" },
+        "cities": [
+          { "code": "IST", "names": { "en": "Istanbul", "ar": "إسطنبول" } }
+        ]
+      }
+    ]
+  },
+  {
+    "code": "IT",
+    "names": { "en": "Italy", "ar": "إيطاليا" },
+    "states": [
+      {
+        "code": "LAZ",
+        "names": { "en": "Lazio", "ar": "لاتسيو" },
+        "cities": [{ "code": "ROM", "names": { "en": "Rome", "ar": "روما" } }]
+      }
+    ]
+  },
+  {
+    "code": "ES",
+    "names": { "en": "Spain", "ar": "إسبانيا" },
+    "states": [
+      {
+        "code": "MD",
+        "names": { "en": "Madrid", "ar": "مدريد" },
+        "cities": [
+          { "code": "MAD", "names": { "en": "Madrid", "ar": "مدريد" } }
+        ]
+      }
+    ]
+  },
+  {
+    "code": "ID",
+    "names": { "en": "Indonesia", "ar": "إندونيسيا" },
+    "states": [
+      {
+        "code": "JK",
+        "names": { "en": "Jakarta", "ar": "جاكرتا" },
+        "cities": [
+          { "code": "CGK", "names": { "en": "Jakarta", "ar": "جاكرتا" } }
+        ]
+      }
+    ]
+  },
+  {
+    "code": "MX",
+    "names": { "en": "Mexico", "ar": "المكسيك" },
+    "states": [
+      {
+        "code": "CMX",
+        "names": { "en": "Mexico City", "ar": "مدينة مكسيكو" },
+        "cities": [
+          {
+            "code": "MEX",
+            "names": { "en": "Mexico City", "ar": "مدينة مكسيكو" }
+          }
+        ]
+      }
+    ]
+  }
+]

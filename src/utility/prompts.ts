@@ -1,4 +1,4 @@
-import type { ApplicationState, Lang } from "@/types/types";
+import type { ApplicationState, Lang } from "@/types/Types";
 import { ASSIST_FIELD_LABELS, AssistFieldKey } from "@/constants/assist";
 
 export function fieldLabel(key: AssistFieldKey, lang: Lang): string {

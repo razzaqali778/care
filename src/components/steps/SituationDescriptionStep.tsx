@@ -1,6 +1,6 @@
 import { UseFormReturn } from "react-hook-form";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useLanguage } from "@/contexts/language-context";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Loader2 } from "lucide-react";
 import { Step3FieldBlock } from "@/components/steps/Step3FieldBlock";
 import {
@@ -9,10 +9,10 @@ import {
   makeInitialTouched,
   type Step3Field,
 } from "@/constants/step3";
-import { toApplicationState } from "@/utility/app-state";
+import { toApplicationState } from "@/utility/AppState";
 import { toApiLang, type ApiLang } from "@/constants/lang";
 import { useAutoTranslateStep3 } from "@/hooks/useAutoTranslateStep3";
-import { requestAiAssist } from "@/services/ai-assist";
+import { requestAiAssist } from "@/services/Aiassist";
 
 type FormData = {
   financialSituation: string;

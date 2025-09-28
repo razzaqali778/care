@@ -1,5 +1,5 @@
 import { LanguageSwitch } from "@/components/ui/language-switch";
-import { useLanguage } from "@/contexts/language-context";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { useNavigate } from "react-router-dom";
 
 export function Header() {

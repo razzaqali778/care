@@ -4,20 +4,20 @@ import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form } from "@/components/ui/form";
-import { useLanguage } from "@/contexts/language-context";
-import { PersonalInfoStep } from "@/components/steps/personal-info-step";
-import { FamilyFinancialStep } from "@/components/steps/family-financial-step";
-import { SituationDescriptionStep } from "@/components/steps/situation-description-step";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { PersonalInfoStep } from "@/components/steps/PersonalInfoStep";
+import { FamilyFinancialStep } from "@/components/steps/FamilyFinancialStep";
+import { SituationDescriptionStep } from "@/components/steps/SituationDescriptionStep";
 import {
   personalInfoSchema,
   familyFinancialSchema,
   situationDescriptionSchema,
   fullFormSchema,
-} from "@/lib/validations";
+} from "@/lib/Validations";
 import { ChevronLeft, ChevronRight, Send } from "lucide-react";
-import type { SubmissionForm } from "@/types/types";
+import type { SubmissionForm } from "@/types/Types";
 import { useDraft, clearDraft } from "@/hooks/useDraft";
-import { localizedZodResolver } from "@/lib/localizedZodResolver";
+import { localizedZodResolver } from "@/lib/LocalizedZodResolver";
 import type { StepKey } from "@/constants/steps";
 import { FORM_DEFAULTS, FIELDS_BY_STEP, TITLE_KEYS } from "@/constants/form";
 import { isRTL as isRTLLang } from "@/constants/lang";

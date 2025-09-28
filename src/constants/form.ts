@@ -1,4 +1,4 @@
-import type { SubmissionForm } from "@/types/types";
+import type { SubmissionForm } from "@/types/Types";
 import type { StepKey } from "@/constants/steps";
 
 export const FORM_DEFAULTS: SubmissionForm = {

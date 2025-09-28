@@ -13,8 +13,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useLanguage } from "@/contexts/language-context";
-import type { FamilyFinancialStepProps } from "@/types/types";
+import { useLanguage } from "@/contexts/LanguageContext";
+import type { FamilyFinancialStepProps } from "@/types/Types";
 import {
   STEP2_MARITAL_STATUS,
   STEP2_EMPLOYMENT_STATUS,

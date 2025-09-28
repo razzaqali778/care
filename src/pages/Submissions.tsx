@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { Header } from "@/components/header";
+import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -11,11 +11,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { useLanguage } from "@/contexts/language-context";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { FileText, ArrowLeft, Pencil, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useToast } from "@/hooks/use-toast";
-import { api } from "@/lib/api";
+import { useToast } from "@/hooks/useToast";
+import { api } from "@/lib/Api";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 export default function Submissions() {

@@ -1,4 +1,4 @@
-import { ApplicationState } from "@/types/types";
+import { ApplicationState } from "@/types/Types";
 import { AssistFieldKey } from "./assist";
 
 export const STEP3_FIELDS = [

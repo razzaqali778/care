@@ -1,4 +1,4 @@
-import type { ApplicationState } from "@/types/types";
+import type { ApplicationState } from "@/types/Types";
 
 export type Step3Form = {
   financialSituation: string;

@@ -1,4 +1,4 @@
-import type { Lang } from "@/types/types";
+import type { Lang } from "@/types/Types";
 
 export function formatCurrency(
   amount: number | undefined,
