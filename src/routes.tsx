@@ -1,6 +1,7 @@
 import React, { Suspense, lazy } from "react";
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import { ErrorBoundary } from "@/shared/ErrorBoundary";
+import { LoadingFallback } from "@/components/LoadingFallback";
 
 const Index = lazy(() => import("@/pages/Index"));
 const Application = lazy(() => import("@/pages/Application"));
@@ -9,7 +10,7 @@ const NotFound = lazy(() => import("@/pages/NotFound"));
 
 const withShell = (el: React.ReactNode) => (
   <ErrorBoundary>
-    <Suspense fallback={<div className="p-6">Loading…</div>}>{el}</Suspense>
+    <Suspense fallback={<LoadingFallback />}>{el}</Suspense>
   </ErrorBoundary>
 );
 

@@ -1,6 +1,7 @@
 import dataset from "@/data/geo.json";
+import { EN, type SupportedLang } from "@/constants/lang";
 
-export type Locale = "en" | "ar";
+export type Locale = SupportedLang;
 
 export interface GeoName {
   en: string;
@@ -41,7 +42,7 @@ export function getCountries(lang: Locale, q?: string): Option[] {
 
 export function getStates(
   countryCode?: string,
-  lang: Locale = "en",
+  lang: Locale = EN,
   q?: string
 ): Option[] {
   if (!countryCode) return [];
@@ -62,7 +63,7 @@ export function getStates(
 export function getCities(
   countryCode?: string,
   stateCode?: string,
-  lang: Locale = "en",
+  lang: Locale = EN,
   q?: string
 ): Option[] {
   if (!countryCode || !stateCode) return [];

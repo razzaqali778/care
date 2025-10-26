@@ -1,75 +1,130 @@
-import type { Submission, SubmissionForm, SubmissionRow } from "@/types/Types";
+﻿import type { Submission, SubmissionForm, SubmissionRow } from "@/types/Types";
+import {
+  API_OPERATION_DELAYS,
+  STORAGE_KEYS,
+  type SubmissionApiOperation,
+} from "@/constants/api";
+import {
+  createApiClient,
+  type ApiInterceptor,
+  type ApiOperation,
+} from "@/lib/ApiClient";
 
-const KEY = "submissions";
-const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
+const sleep = (ms: number) =>
+  new Promise((resolve) => globalThis.setTimeout(resolve, ms));
 
-function read(): Submission[] {
+const delayInterceptor: ApiInterceptor = {
+  async onRequest({ operation }) {
+    const delayMs =
+      API_OPERATION_DELAYS[operation as SubmissionApiOperation] ?? 0;
+    if (delayMs > 0) {
+      await sleep(delayMs);
+    }
+  },
+};
+
+const logErrorInterceptor: ApiInterceptor = {
+  onError(error, { operation }) {
+    console.error(`[api:${operation}]`, error);
+  },
+};
+
+const client = createApiClient([delayInterceptor, logErrorInterceptor]);
+const STORAGE_KEY = STORAGE_KEYS.submissions;
+
+const read = (): Submission[] => {
   try {
-    return JSON.parse(localStorage.getItem(KEY) || "[]");
+    return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
   } catch {
     return [];
   }
-}
-function write(list: Submission[]) {
-  localStorage.setItem(KEY, JSON.stringify(list));
-}
+};
+
+const write = (list: Submission[]) => {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+};
+
+const exec = <T>(
+  operation: ApiOperation,
+  action: () => Promise<T>,
+  payload?: unknown
+) => client.execute(operation, action, payload);
 
 export const api = {
-  async list(): Promise<Submission[]> {
-    await delay(150);
-    return read();
+  list(): Promise<Submission[]> {
+    return exec("list", async () => read());
   },
-  async get(id: string): Promise<Submission | undefined> {
-    await delay(120);
-    return read().find((s) => s.id === id);
+  get(id: string): Promise<Submission | undefined> {
+    return exec(
+      "get",
+      async () => read().find((submission) => submission.id === id),
+      id
+    );
   },
-  async create(payload: SubmissionForm): Promise<Submission> {
-    await delay(200);
-    const now = new Date().toISOString();
-    const sub: Submission = {
-      id: String(Date.now()),
-      ...payload,
-      submittedAt: now,
-      updatedAt: now,
-    };
-    const list = read();
-    list.push(sub);
-    write(list);
-    return sub;
+  create(payload: SubmissionForm): Promise<Submission> {
+    return exec(
+      "create",
+      async () => {
+        const now = new Date().toISOString();
+        const submission: Submission = {
+          id: String(Date.now()),
+          ...payload,
+          submittedAt: now,
+          updatedAt: now,
+        };
+        const list = read();
+        list.push(submission);
+        write(list);
+        return submission;
+      },
+      payload
+    );
   },
-  async update(
+  update(
     id: string,
     payload: SubmissionForm
   ): Promise<Submission | undefined> {
-    await delay(200);
-    const list = read();
-    const idx = list.findIndex((s) => s.id === id);
-    if (idx < 0) return undefined;
-    const updated: Submission = {
-      ...list[idx],
-      ...payload,
-      id,
-      updatedAt: new Date().toISOString(),
-    };
-    list[idx] = updated;
-    write(list);
-    return updated;
+    return exec(
+      "update",
+      async () => {
+        const list = read();
+        const idx = list.findIndex((submission) => submission.id === id);
+        if (idx < 0) return undefined;
+        const updated: Submission = {
+          ...list[idx],
+          ...payload,
+          id,
+          updatedAt: new Date().toISOString(),
+        };
+        list[idx] = updated;
+        write(list);
+        return updated;
+      },
+      { id, payload }
+    );
   },
-  async remove(id: string): Promise<void> {
-    await delay(120);
-    write(read().filter((s) => s.id !== id));
+  remove(id: string): Promise<void> {
+    return exec(
+      "remove",
+      async () => {
+        write(read().filter((submission) => submission.id !== id));
+      },
+      id
+    );
   },
-  toRow(s: Submission): SubmissionRow {
+  toRow(submission: Submission): SubmissionRow {
+    const { reasonForApplying = "" } = submission;
+    const trimmedReason = reasonForApplying.slice(0, 50);
+    const hasOverflow = reasonForApplying.length > 50;
+
     return {
-      id: s.id,
-      idTail: `#${s.id.slice(-6)}`,
-      name: s.name ?? "",
-      nationalId: s.nationalId ?? "",
-      email: s.email ?? "",
-      reasonShort:
-        (s.reasonForApplying ?? "").slice(0, 50) +
-        ((s.reasonForApplying ?? "").length > 50 ? "…" : ""),
-      submittedAtFmt: formatDate(s.submittedAt),
+      id: submission.id,
+      idTail: `#${submission.id.slice(-6)}`,
+      name: submission.name ?? "",
+      nationalId: submission.nationalId ?? "",
+      email: submission.email ?? "",
+      reasonShort: trimmedReason + (hasOverflow ? "..." : ""),
+      submittedAtFmt: formatDate(submission.submittedAt),
     };
   },
 };

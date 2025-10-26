@@ -1,73 +1,67 @@
-import * as React from "react";
-import { UseFormReturn } from "react-hook-form";
+import { useEffect, useMemo, useState } from "react";
+import { ReloadIcon as Reload } from "@radix-ui/react-icons";
+import { PenTool, Edit3, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { ReloadIcon as Reload } from "@radix-ui/react-icons";
-import { PenTool, Edit3, Check, X } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { requestAiAssist } from "@/services/Aiassist";
-import type { ApplicationState } from "@/types/Types";
-import { makeAssistLabels, type AssistTargetField } from "@/constants/assist";
-import { toApplicationState, type Step3Form } from "../utility/AppState";
+import { makeAssistLabels } from "@/constants/assist";
 import { toApiLang, type SupportedLang } from "@/constants/lang";
+import { toApplicationState } from "@/utility/AppState";
+import type { AiAssistProps } from "@/features/assist/types";
+import { requestAiAssist } from "@/features/assist/services/aiAssist";
 
-export function AiAssist({
+export const AiAssistDialog = ({
   form,
   targetField,
   fieldKey,
-}: {
-  form: UseFormReturn<Step3Form>;
-  targetField: AssistTargetField;
-  fieldKey: keyof ApplicationState["situation"];
-}) {
+}: AiAssistProps) => {
   const { t, language } = useLanguage();
-  const labels = React.useMemo(() => makeAssistLabels(t), [t]);
+  const labels = useMemo(() => makeAssistLabels(t), [t]);
 
-  const [open, setOpen] = React.useState(false);
-  const [loading, setLoading] = React.useState(false);
-  const [value, setValue] = React.useState("");
-  const [editable, setEditable] = React.useState(false);
-  const [err, setErr] = React.useState<string | null>(null);
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [value, setValue] = useState("");
+  const [editable, setEditable] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // API expects "en" | "ar"
   const lang = toApiLang(language as SupportedLang);
 
   const generate = async (seed?: string) => {
-    setErr(null);
+    setError(null);
     setLoading(true);
     try {
       const draft = await requestAiAssist({
-        fieldKey, // server-side key
+        fieldKey,
         application: toApplicationState(form.getValues()),
         language: lang,
         sourceText: seed && seed.trim() ? seed : undefined,
       });
       setValue(draft.trim());
       setEditable(false);
-    } catch (e: any) {
-      setErr(e?.message || "Failed to generate suggestion.");
+    } catch (err: any) {
+      setError(err?.message || labels.error);
     } finally {
       setLoading(false);
     }
   };
 
-  const onOpen = () => {
+  const handleOpen = () => {
     setOpen(true);
     const seed = (form.getValues()[targetField] || "") as string;
     setValue(seed);
     setEditable(false);
-    setErr(null);
+    setError(null);
     void generate(seed);
   };
 
-  const onInsert = () => {
+  const handleInsert = () => {
     const text = value.trim();
     if (!text) return;
     form.setValue(targetField, text, {
@@ -78,7 +72,7 @@ export function AiAssist({
     setOpen(false);
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!open) return;
     const seed = (form.getValues()[targetField] || "") as string;
     void generate(seed);
@@ -90,7 +84,7 @@ export function AiAssist({
         type="button"
         variant="outline"
         size="sm"
-        onClick={onOpen}
+        onClick={handleOpen}
         className="flex items-center gap-2"
       >
         <PenTool className="h-4 w-4" />
@@ -107,7 +101,7 @@ export function AiAssist({
             <div className="relative">
               <Textarea
                 value={value}
-                onChange={(e) => setValue(e.target.value)}
+                onChange={(event) => setValue(event.target.value)}
                 rows={10}
                 placeholder={labels.suggestion}
                 readOnly={!editable || loading}
@@ -115,15 +109,15 @@ export function AiAssist({
                 className={loading ? "opacity-90" : ""}
               />
               {loading && (
-                <div className="absolute inset-0 flex items-center justify-center bg-background/60 rounded-md">
+                <div className="absolute inset-0 flex items-center justify-center rounded-md bg-background/60">
                   <Reload
                     className="h-5 w-5 animate-spin"
                     aria-label={labels.generating}
                   />
                 </div>
               )}
-              {err && (
-                <p className="text-sm text-destructive mt-2">{labels.error}</p>
+              {error && (
+                <p className="mt-2 text-sm text-destructive">{labels.error}</p>
               )}
             </div>
 
@@ -144,7 +138,7 @@ export function AiAssist({
                 <Button
                   type="button"
                   variant="secondary"
-                  onClick={() => setEditable((v) => !v)}
+                  onClick={() => setEditable((state) => !state)}
                   disabled={!value || loading}
                   className="gap-2"
                 >
@@ -167,7 +161,7 @@ export function AiAssist({
                 </Button>
                 <Button
                   type="button"
-                  onClick={onInsert}
+                  onClick={handleInsert}
                   disabled={!value || loading}
                 >
                   {labels.insert}
@@ -181,4 +175,6 @@ export function AiAssist({
       </Dialog>
     </>
   );
-}
+};
+
+export default AiAssistDialog;

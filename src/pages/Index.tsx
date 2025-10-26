@@ -131,7 +131,7 @@ const Index = () => {
                 size="lg"
                 variant="secondary"
                 onClick={() => navigate(routes.application("new", "personal"))}
-                className={`shadow-medium hover:shadow-strong transition-all duration-300 w-full sm:w-auto flex items-center ${
+                className={`shadow-medium hover:shadow-strong transition-all duration-300 w-full sm:w-auto flex items-center justify-center mx-auto ${
                   isRTL ? "flex-row-reverse" : ""
                 }`}
               >

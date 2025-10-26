@@ -1,4 +1,5 @@
 import { UiField, UiLang } from "@/types/Types";
+import { AR, EN, DIR_LTR, DIR_RTL, type TextDirection } from "@/constants/lang";
 
 const FORCE_LTR = new Set<UiField>([
   "email",
@@ -8,11 +9,11 @@ const FORCE_LTR = new Set<UiField>([
 ]);
 
 export function fieldTextProps(language: UiLang, field: UiField) {
-  const rtl = language === "ar";
+  const rtl = language === AR;
   const forceLtr = FORCE_LTR.has(field);
-  const dir: "ltr" | "rtl" = forceLtr ? "ltr" : rtl ? "rtl" : "ltr";
-  const langAttr: "en" | "ar" = forceLtr ? "en" : rtl ? "ar" : "en";
+  const dir: TextDirection = forceLtr ? DIR_LTR : rtl ? DIR_RTL : DIR_LTR;
+  const langAttr: UiLang = forceLtr ? EN : rtl ? AR : EN;
 
-  const className = dir === "rtl" ? "text-right" : "text-left";
+  const className = dir === DIR_RTL ? "text-right" : "text-left";
   return { dir, lang: langAttr, className };
 }

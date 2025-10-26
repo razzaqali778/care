@@ -18,6 +18,9 @@ import { useToast } from "@/hooks/useToast";
 import { api } from "@/lib/Api";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
+const DELETE_CONFIRM_FALLBACK =
+  "Delete this submission? This cannot be undone.";
+
 export default function Submissions() {
   const navigate = useNavigate();
   const { t } = useLanguage();
@@ -33,7 +36,13 @@ export default function Submissions() {
     mutationFn: api.remove,
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["submissions"] });
-      toast({ title: "Deleted", description: "The submission was removed." });
+      toast({
+        title:
+          t("submissions.toast.deletedTitle") || "Submission deleted",
+        description:
+          t("submissions.toast.deletedDesc") ||
+          "The submission was removed.",
+      });
     },
   });
 
@@ -43,10 +52,12 @@ export default function Submissions() {
   );
   const handleDelete = useCallback(
     (id: string) => {
-      if (!confirm("Delete this submission? This cannot be undone.")) return;
+      const confirmMessage =
+        t("submissions.actions.deleteConfirm") || DELETE_CONFIRM_FALLBACK;
+      if (!window.confirm(confirmMessage)) return;
       remove.mutate(id);
     },
-    [remove]
+    [remove, t]
   );
 
   const rows = submissions.map(api.toRow);
@@ -119,14 +130,18 @@ export default function Submissions() {
                       <TableHead className="min-w-[120px]">
                         {t("submissions.table.nationalId")}
                       </TableHead>
-                      <TableHead className="min-w-[150px]">Email</TableHead>
+                      <TableHead className="min-w-[150px]">
+                        {t("submissions.table.email")}
+                      </TableHead>
                       <TableHead className="min-w-[200px]">
                         {t("submissions.table.reason")}
                       </TableHead>
                       <TableHead className="min-w-[120px]">
                         {t("submissions.table.submittedAt")}
                       </TableHead>
-                      <TableHead className="min-w-[140px]">Actions</TableHead>
+                      <TableHead className="min-w-[140px]">
+                        {t("submissions.table.actions")}
+                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -156,20 +171,28 @@ export default function Submissions() {
                               size="sm"
                               className="flex items-center gap-1"
                               onClick={() => handleEdit(r.id)}
-                              title="Edit"
+                              title={
+                                t("submissions.actions.edit") || "Edit"
+                              }
                             >
                               <Pencil className="h-4 w-4" />
-                              <span className="hidden sm:inline">Edit</span>
+                              <span className="hidden sm:inline">
+                                {t("submissions.actions.edit")}
+                              </span>
                             </Button>
                             <Button
                               variant="ghost"
                               size="sm"
                               className="flex items-center gap-1 text-destructive"
                               onClick={() => handleDelete(r.id)}
-                              title="Delete"
+                              title={
+                                t("submissions.actions.delete") || "Delete"
+                              }
                             >
                               <Trash2 className="h-4 w-4" />
-                              <span className="hidden sm:inline">Delete</span>
+                              <span className="hidden sm:inline">
+                                {t("submissions.actions.delete")}
+                              </span>
                             </Button>
                           </div>
                         </TableCell>

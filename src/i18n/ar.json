@@ -112,7 +112,6 @@
   "assist.regenerate": "إعادة الإنشاء",
   "assist.suggestion": "اقتراح",
   "assist.error": "تعذّر إنشاء اقتراح.",
-
   "errors.name.min": "يجب أن يكون الاسم على الأقل حرفين",
   "errors.nationalId.min": "يجب أن تكون الهوية الوطنية على الأقل 5 أحرف",
   "errors.dateOfBirth.required": "تاريخ الميلاد مطلوب",
@@ -131,8 +130,14 @@
   "errors.financialSituation.min": "يرجى تقديم 10 أحرف على الأقل تصف وضعك المالي",
   "errors.employmentCircumstance.min": "يرجى تقديم 10 أحرف على الأقل تصف ظروفك الوظيفية",
   "errors.reasonForApplying.min": "يرجى تقديم 10 أحرف على الأقل تشرح سبب التقديم",
-  "applicationCreated": "Application submitted",
-  "applicationUpdated": "Application updated",
-  "takingYouToSubmissions": "Taking you to your submissions...",
-  "stayOnPage": "Your changes have been saved."
+  "success.applicationUpdated": "تم تحديث الطلب بنجاح",
+  "success.takingYouToSubmissions": "جاري تحويلك إلى صفحة الطلبات...",
+  "success.stayOnPage": "أو يمكنك البقاء في هذه الصفحة.",
+  "submissions.table.email": "البريد الإلكتروني",
+  "submissions.table.actions": "الإجراءات",
+  "submissions.actions.edit": "تعديل",
+  "submissions.actions.delete": "حذف",
+  "submissions.actions.deleteConfirm": "هل أنت متأكد أنك تريد حذف هذا الطلب؟ لا يمكن التراجع عن هذا الإجراء.",
+  "submissions.toast.deletedTitle": "تم الحذف",
+  "submissions.toast.deletedDesc": "تم حذف الطلب بنجاح من القائمة."
 }

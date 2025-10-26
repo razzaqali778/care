@@ -5,9 +5,13 @@ export type SupportedLang = (typeof SUPPORTED_LANGS)[number];
 export const EN: SupportedLang = "en";
 export const AR: SupportedLang = "ar";
 
-export const LANG_DIR: Record<SupportedLang, "ltr" | "rtl"> = {
-  en: "ltr",
-  ar: "rtl",
+export const DIR_LTR = "ltr" as const;
+export const DIR_RTL = "rtl" as const;
+export type TextDirection = typeof DIR_LTR | typeof DIR_RTL;
+
+export const LANG_DIR: Record<SupportedLang, TextDirection> = {
+  en: DIR_LTR,
+  ar: DIR_RTL,
 };
 
 const SUPPORTED_SET: ReadonlySet<string> = new Set(SUPPORTED_LANGS);

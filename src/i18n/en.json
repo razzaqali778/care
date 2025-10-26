@@ -130,8 +130,14 @@
   "errors.financialSituation.min": "Please provide at least 10 characters describing your financial situation",
   "errors.employmentCircumstance.min": "Please provide at least 10 characters describing your employment circumstances",
   "errors.reasonForApplying.min": "Please provide at least 10 characters explaining your reason for applying",
-  "applicationCreated": "تم إرسال الطلب",
-  "applicationUpdated": "تم تحديث الطلب",
-  "takingYouToSubmissions": "سيتم نقلك إلى صفحة الطلبات...",
-  "stayOnPage": "تم حفظ التغييرات."
+  "success.applicationUpdated": "Application updated",
+  "success.takingYouToSubmissions": "Taking you to your submissions...",
+  "success.stayOnPage": "Your changes have been saved.",
+  "submissions.table.email": "Email",
+  "submissions.table.actions": "Actions",
+  "submissions.actions.edit": "Edit",
+  "submissions.actions.delete": "Delete",
+  "submissions.actions.deleteConfirm": "Delete this submission? This cannot be undone.",
+  "submissions.toast.deletedTitle": "Submission deleted",
+  "submissions.toast.deletedDesc": "The submission was removed."
 }

@@ -13,8 +13,9 @@ import {
   DRAFT_PREFIX,
   routes,
   I18N_KEYS,
+  I18N_FALLBACKS,
 } from "@/constants/application";
-import { normalizeInitialValues } from "../utility/Submission";
+import { normalizeInitialValues } from "@/features/application/utils/initialValues";
 
 export default function Application() {
   const navigate = useNavigate();
@@ -45,10 +46,9 @@ export default function Application() {
   useEffect(() => {
     if (id && !isLoading && record === undefined) {
       toast({
-        title: t(I18N_KEYS.notFoundTitle) || "Not found",
+        title: t(I18N_KEYS.notFoundTitle) || I18N_FALLBACKS.notFoundTitle,
         description:
-          t(I18N_KEYS.notFoundDesc) ||
-          "The submission you tried to edit does not exist.",
+          t(I18N_KEYS.notFoundDesc) || I18N_FALLBACKS.notFoundDesc,
       });
       navigate(routes.submissions, { replace: true });
     }
@@ -65,8 +65,12 @@ export default function Application() {
       localStorage.removeItem(draftKey);
       qcInvalidate();
       toast({
-        title: t(I18N_KEYS.successSubmittedTitle),
-        description: t(I18N_KEYS.successRedirecting),
+        title:
+          t(I18N_KEYS.successSubmittedTitle) ||
+          I18N_FALLBACKS.successSubmittedTitle,
+        description:
+          t(I18N_KEYS.successRedirecting) ||
+          I18N_FALLBACKS.successRedirecting,
       });
       navigate(routes.submissions);
     },
@@ -79,8 +83,12 @@ export default function Application() {
       localStorage.removeItem(draftKey);
       qcInvalidate();
       toast({
-        title: t(I18N_KEYS.successUpdatedTitle) || "Application updated",
-        description: t(I18N_KEYS.successRedirecting),
+        title:
+          t(I18N_KEYS.successUpdatedTitle) ||
+          I18N_FALLBACKS.successUpdatedTitle,
+        description:
+          t(I18N_KEYS.successRedirecting) ||
+          I18N_FALLBACKS.successRedirecting,
       });
       navigate(routes.submissions);
     },

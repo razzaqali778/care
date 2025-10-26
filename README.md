@@ -31,115 +31,68 @@ Without a key, AI features fall back to safe offline behavior.
 
 ```text
 src/
-├─ components/
-│  ├─ application-form.tsx          # Multi-step form (Stepper, validation, navigation)
-│  ├─ header.tsx                    # App header + language switch
-│  ├─ steps/
-│  │  ├─ personal-info-step.tsx     # Step 1: personal fields + auto-translate on lang toggle
-│  │  ├─ family-financial-step.tsx  # Step 2: family/financial fields
-│  │  └─ situation-description-step.tsx # Step 3: textareas + AI Assist + error gating
-│  └─ ui/                           # Shadcn UI primitives (typed, local)
-│
-├─ contexts/
-│  └─ language-context.tsx          # Global language state ("en" | "ar"), RTL/LTR direction
-│
-├─ i18n/
-│  └─ translations.ts               # English/Arabic translation dictionaries
-│
-├─ lib/
-│  ├─ text-direction.ts              # RTL/LTR helpers
-│  ├─ utils.ts                       # Shared helpers
-│  └─ validations.ts                 # zod schemas (per-step + full form)
-│
-├─ pages/
-│  ├─ Index.tsx                     # Landing page
-│  ├─ Application.tsx               # Main form page (persist state)
-│  └─ Submissions.tsx               # Saved submissions (localStorage)
-│
-├─ services/
-│  └─ ai-assist.ts                  # OpenAI API chat + offline fallback & translators
-│
-├─ types/
-│  └─ types.ts                      # Shared types (ApplicationState, AssistFieldKey, Lang)
-│
-├─ App.tsx / main.tsx               # Router + Providers (QueryClient, Tooltip, Language)
-├─ index.css / App.css              # Tailwind base + custom styles
-└─ vite.config.ts                   # Vite config
+  components/
+    ApplicationForm.tsx        # Multi-step form shell (re-exported feature component)
+    Header.tsx                 # App header + language switch
+    steps/                     # Step-specific inputs
+    ui/                        # Local shadcn/ui primitives
+  features/
+    application/               # Stepper hook, form constants, utilities
+    assist/                    # AI Assist prompts, dialog, services
+  contexts/                    # Global providers (Language, etc.)
+  hooks/                       # Shared hooks (drafts, translations, toasts)
+  lib/                         # API client, validation helpers, misc utils
+  pages/                       # Route-level screens (Index, Application, Submissions)
+  constants/                   # Routes, form config, enums, labels
+  styles/                      # Tailwind configuration and global CSS
+  App.tsx / main.tsx           # Router + providers bootstrap
+  vite.config.ts               # Vite configuration
 ```
 
 ---
 
 ## 3. Key Concepts
 
-### 📝 Multi-step Form
+### Multi-step Form
 
-- Step 1: Personal Info
-- Step 2: Family & Financial Info
-- Step 3: Situation Description (AI Assist + auto-translation)
-- Step validation is schema-driven (zod).
+- Step 1: Personal info
+- Step 2: Family & financial details
+- Step 3: Situation description (AI Assist + translation)
+- Zod schemas gate each step and the full payload before submission.
 
-### 🌐 i18n & RTL
+### i18n & RTL
 
-- `language-context.tsx` manages language (`en` / `ar`).
-- Text direction auto-switches (LTR/RTL).
-- Placeholders + labels update instantly.
+- `LanguageContext` manages the locale (`en` / `ar`) and direction.
+- Layout flips automatically; labels and placeholders re-render instantly.
 
-### 🤖 AI Assist
+### AI Assist
 
-- `ai-assist.ts` calls OpenAI Chat Completions API.
-- If no API key → offline template-based fallback.
-- Supports refine vs generate prompts.
-- Integrated via `AiAssist` button in Step 3.
+- `features/assist/services/aiAssist.ts` wraps OpenAI Chat Completions.
+- Offline templates guarantee deterministic copy when no API key exists.
+- Prompt builders support both generate and refine flows.
 
-### ✅ Validation
+### Validation & Persistence
 
-- Step-level schemas in `validations.ts`.
-- Errors only show if field touched or after submit attempt.
-
-### 💾 Persistence
-
-- Submissions stored in localStorage.
-- Can be listed on `Submissions.tsx`.
-
----
-
-## 4. Data Flow Diagram (Mermaid)
-
-```mermaid
-flowchart TD
-  User -->|fills form| Form[ApplicationForm]
-  Form --> Step1[Personal Info Step]
-  Form --> Step2[Family & Financial Step]
-  Form --> Step3[Situation Description]
-
-  Step3 -->|AI Assist| AiService[ai-assist.ts]
-  AiService -->|OpenAI API| OpenAI[(ChatGPT)]
-  AiService -->|fallback| Offline[Offline Draft]
-
-  Form --> Validation[Zod Schemas]
-  Validation --> Errors[Field Errors]
-
-  Form --> Storage[localStorage]
-```
+- Shared zod schemas enforce constraints.
+- Drafts live in `localStorage` so users can resume work.
+- Submissions listing reads/writes from the same storage key.
 
 ---
 
 ## 5. Development Guidelines
 
-- **Types first** → always extend `types.ts`.
-- **Validation** → all new fields require zod schema.
-- **Translations** → add both `en` and `ar` entries.
-- **UI** → prefer `ui/` primitives, follow Tailwind design.
+- **Types first** - extend the shared types module before wiring new data.
+- **Validation** - every new field belongs in the zod schemas.
+- **Translations** - always add both `en` and `ar` entries.
+- **UI** - prefer `components/ui` primitives for consistent styling.
 
 ---
 
 ## 6. Troubleshooting
 
-- **Form shows errors immediately?** → ensure `shouldValidate` is `false` in auto-translations.
-- **Arabic not detected?** → check regex in `isArabic()`.
-- **AI Assist fails?** → verify `REACT_APP_OPENAI_API_KEY`.
-
----
+- **Form shows errors immediately?** Ensure translation hooks do not trigger validation.
+- **Arabic not detected?** Double-check language helpers in `constants/lang.ts`.
+- **AI Assist fails?** Verify `VITE_OPENAI_API_KEY` or rely on the offline fallback.
 
 ## 7. Future Improvements
 
@@ -147,10 +100,10 @@ flowchart TD
 - Export/import submissions (JSON).
 - Multi-user profiles.
 
-## 📸 Screenshots
+## Screenshots
 
 <details>
-  <summary><strong>Open gallery (1–14)</strong></summary>
+  <summary><strong>Open gallery (1-14)</strong></summary>
 
   <p align="center">
     <img src="imgs/1.png"  alt="Screenshot 1"  width="260" />

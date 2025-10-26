@@ -1,4 +1,5 @@
 import type { Lang } from "@/types/Types";
+import { AR, EN } from "@/constants/lang";
 
 export function formatCurrency(
   amount: number | undefined,
@@ -6,7 +7,8 @@ export function formatCurrency(
   currency = "USD"
 ): string {
   const n = typeof amount === "number" ? amount : 0;
-  return new Intl.NumberFormat(lang === "ar" ? "ar" : "en", {
+  const locale = lang === AR ? AR : EN;
+  return new Intl.NumberFormat(locale, {
     style: "currency",
     currency,
     maximumFractionDigits: 0,

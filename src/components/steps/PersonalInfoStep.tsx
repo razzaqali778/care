@@ -24,6 +24,8 @@ import {
 } from "@/hooks/useGeoOptions";
 import { isRTL as isRTLLang } from "@/constants/lang";
 import { PhoneNumberField } from "../ui/PhoneNumberField";
+import type { Locale } from "@/lib/Geo";
+import { FORM_FIELDS } from "@/constants/formFields";
 
 interface PersonalInfoStepProps {
   form: UseFormReturn<SubmissionForm>;
@@ -31,13 +33,13 @@ interface PersonalInfoStepProps {
 
 export function PersonalInfoStep({ form }: PersonalInfoStepProps) {
   const { t, language } = useLanguage();
-  const uiLang = (language?.startsWith("ar") ? "ar" : "en") as "ar" | "en";
+  const uiLang: Locale = language;
   const isRTL = isRTLLang(language);
   const req = t("common.requiredMark");
 
   // We store codes in the form values
-  const countryCode = form.watch("country"); // e.g., "SA"
-  const stateCode = form.watch("state"); // e.g., "01"
+  const countryCode = form.watch(FORM_FIELDS.country);
+  const stateCode = form.watch(FORM_FIELDS.state);
 
   const countryOptions = useCountryOptions(uiLang);
   const stateOptions = useStateOptions(countryCode, uiLang);
@@ -151,7 +153,7 @@ export function PersonalInfoStep({ form }: PersonalInfoStepProps) {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <FormField
           control={form.control}
-          name="country"
+          name={FORM_FIELDS.country}
           render={({ field }) => (
             <FormItem>
               <FormLabel>
@@ -162,9 +164,13 @@ export function PersonalInfoStep({ form }: PersonalInfoStepProps) {
                 value={field.value ?? ""}
                 onValueChange={(v) => {
                   field.onChange(v);
-                  form.setValue("state", "");
-                  form.setValue("city", "");
-                  form.trigger(["country", "state", "city"]);
+                  form.setValue(FORM_FIELDS.state, "");
+                  form.setValue(FORM_FIELDS.city, "");
+                  form.trigger([
+                    FORM_FIELDS.country,
+                    FORM_FIELDS.state,
+                    FORM_FIELDS.city,
+                  ]);
                 }}
               >
                 <FormControl>
@@ -186,7 +192,7 @@ export function PersonalInfoStep({ form }: PersonalInfoStepProps) {
         />
         <FormField
           control={form.control}
-          name="state"
+          name={FORM_FIELDS.state}
           render={({ field }) => (
             <FormItem>
               <FormLabel>
@@ -197,8 +203,8 @@ export function PersonalInfoStep({ form }: PersonalInfoStepProps) {
                 value={field.value ?? ""}
                 onValueChange={(v) => {
                   field.onChange(v);
-                  form.setValue("city", "");
-                  form.trigger(["state", "city"]);
+                  form.setValue(FORM_FIELDS.city, "");
+                  form.trigger([FORM_FIELDS.state, FORM_FIELDS.city]);
                 }}
                 disabled={!countryCode}
               >
@@ -221,7 +227,7 @@ export function PersonalInfoStep({ form }: PersonalInfoStepProps) {
         />
         <FormField
           control={form.control}
-          name="city"
+          name={FORM_FIELDS.city}
           render={({ field }) => (
             <FormItem>
               <FormLabel>
@@ -234,7 +240,7 @@ export function PersonalInfoStep({ form }: PersonalInfoStepProps) {
                 value={field.value ?? ""}
                 onValueChange={(v) => {
                   field.onChange(v);
-                  form.trigger("city");
+                  form.trigger(FORM_FIELDS.city);
                 }}
                 disabled={!countryCode || !stateCode}
               >
@@ -261,7 +267,7 @@ export function PersonalInfoStep({ form }: PersonalInfoStepProps) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <PhoneNumberField
           control={form.control}
-          name="phone"
+          name={FORM_FIELDS.phone}
           label={t("step1.phone.label")}
           placeholder={t("step1.phone.placeholder")}
           requiredMark={req}

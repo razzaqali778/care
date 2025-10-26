@@ -1,3 +1,4 @@
+import { Suspense, lazy } from "react";
 import { UseFormReturn } from "react-hook-form";
 import {
   FormField,
@@ -6,9 +7,19 @@ import {
   FormControl,
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
-import { AiAssist } from "@/components/AiAssist";
 import { STEP3_COPY, type Step3Field } from "@/constants/step3";
 import { getFieldError } from "@/utility/FormError";
+import type { AiAssistProps } from "@/features/assist/types";
+
+const AiAssistDialog = lazy(() =>
+  import("@/features/assist/components/AiAssistDialog").then((module) => ({
+    default: module.AiAssistDialog,
+  }))
+);
+
+const AssistButtonFallback = () => (
+  <div className="h-9 w-32 animate-pulse rounded-md bg-muted" aria-hidden />
+);
 
 type Step3FieldBlockProps<T extends Record<string, any>> = {
   form: UseFormReturn<T>;
@@ -34,11 +45,15 @@ export function Step3FieldBlock<T extends Record<string, any>>({
         <FormLabel htmlFor={copy.inputId}>
           {t(copy.labelKey)} {reqMark}
         </FormLabel>
-        <AiAssist
-          form={form as any}
-          targetField={field}
-          fieldKey={copy.assistKey}
-        />
+        <Suspense fallback={<AssistButtonFallback />}>
+          <AiAssistDialog
+            {...({
+              form,
+              targetField: field,
+              fieldKey: copy.assistKey,
+            } as unknown as AiAssistProps)}
+          />
+        </Suspense>
       </div>
       <FormField
         control={form.control}

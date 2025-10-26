@@ -1,5 +1,5 @@
 import type { SubmissionForm } from "@/types/Types";
-import type { StepKey } from "@/constants/steps";
+import type { StepKey } from "@/constants/application";
 
 export const FORM_DEFAULTS: SubmissionForm = {
   name: "",

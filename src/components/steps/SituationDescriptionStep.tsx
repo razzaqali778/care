@@ -12,7 +12,8 @@ import {
 import { toApplicationState } from "@/utility/AppState";
 import { toApiLang, type ApiLang } from "@/constants/lang";
 import { useAutoTranslateStep3 } from "@/hooks/useAutoTranslateStep3";
-import { requestAiAssist } from "@/services/Aiassist";
+import { requestAiAssist } from "@/features/assist/services/aiAssist";
+import { makeAssistLabels } from "@/constants/assist";
 
 type FormData = {
   financialSituation: string;
@@ -27,6 +28,7 @@ export function SituationDescriptionStep({
   form: UseFormReturn<FormData>;
 }) {
   const { t, language } = useLanguage();
+  const assistLabels = useMemo(() => makeAssistLabels(t), [t]);
   const req = t("common.requiredMark");
   const lang: ApiLang = toApiLang(language as any);
 
@@ -69,7 +71,7 @@ export function SituationDescriptionStep({
         <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/90 backdrop-blur-sm rounded-md">
           <Loader2 className="h-6 w-6 animate-spin" />
           <span className="sr-only">
-            {t("assist.generating") || "Generating…"}
+            {assistLabels.generating}
           </span>
         </div>
       )}
