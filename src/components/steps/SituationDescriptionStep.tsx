@@ -58,8 +58,7 @@ export function SituationDescriptionStep({
     form,
     lang,
     STEP3_PAIRS,
-    async ({ fieldKey, application, language, sourceText }) =>
-      requestAiAssist({ fieldKey, application, language, sourceText }),
+    requestAiAssist,
     buildAppState
   );
 

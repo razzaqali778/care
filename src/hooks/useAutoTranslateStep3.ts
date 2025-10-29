@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import type { UseFormReturn } from "react-hook-form";
 import type { ApiLang } from "@/constants/lang";
 import type { ApplicationState } from "@/types/Types";
@@ -17,22 +17,28 @@ export function useAutoTranslateStep3<T extends Record<string, any>>(
   }) => Promise<string>,
   buildAppState: () => ApplicationState
 ) {
-  const firstRunRef = useRef(true);
   const [translating, setTranslating] = useState(false);
 
   useEffect(() => {
-    if (firstRunRef.current) {
-      firstRunRef.current = false;
-      return;
-    }
     let cancelled = false;
     const run = async () => {
+      const app = buildAppState();
+      const tasks = pairs
+        .map(([fieldName, assistKey]) => ({
+          fieldName,
+          assistKey,
+          current: (form.getValues()[fieldName] as string) || "",
+        }))
+        .filter(({ current }) => needsTranslation(current, lang));
+
+      if (!tasks.length) {
+        if (!cancelled) setTranslating(false);
+        return;
+      }
+
       setTranslating(true);
       try {
-        const app = buildAppState();
-        for (const [fieldName, assistKey] of pairs) {
-          const current = (form.getValues()[fieldName] as string) || "";
-          if (!needsTranslation(current, lang)) continue;
+        for (const { fieldName, assistKey, current } of tasks) {
           const translated = await request({
             fieldKey: assistKey,
             application: app,
