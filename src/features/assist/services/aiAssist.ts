@@ -1,11 +1,4 @@
-import type { ChatMessage } from "@/types/Types";
-import {
-  OPENAI_CHAT_URL,
-  OPENAI_API_KEY,
-  hasOpenAIKey,
-  DEFAULT_MODEL,
-  OPENAI_DEFAULTS,
-} from "@/constants/ai";
+import { hasOpenAIKey, OPENAI_DEFAULTS } from "@/constants/ai";
 import {
   buildGeneratePrompt,
   buildRefinePrompt,
@@ -14,45 +7,11 @@ import {
   systemTranslatePrompt,
   userTranslatePrompt,
 } from "@/features/assist/prompts";
+import {
+  openAiClient,
+  type OpenAiChatRequest,
+} from "@/features/assist/services/openAiClient";
 import type { AiAssistRequest } from "../types";
-
-async function chatComplete({
-  messages,
-  model = DEFAULT_MODEL,
-  maxTokens = OPENAI_DEFAULTS.maxTokens,
-  temperature = OPENAI_DEFAULTS.temperature,
-  signal,
-}: {
-  messages: ChatMessage[];
-  model?: string;
-  maxTokens?: number;
-  temperature?: number;
-  signal?: AbortSignal;
-}): Promise<string> {
-  if (!OPENAI_API_KEY) throw new Error("Missing OpenAI API key");
-  const response = await fetch(OPENAI_CHAT_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${OPENAI_API_KEY}`,
-    },
-    signal,
-    body: JSON.stringify({
-      model,
-      messages,
-      temperature,
-      max_tokens: maxTokens,
-    }),
-  });
-
-  if (!response.ok) {
-    const body = await response.text().catch(() => "<no body>");
-    throw new Error(`[OpenAI ${response.status}] ${body.slice(0, 500)}`);
-  }
-
-  const data = await response.json();
-  return data?.choices?.[0]?.message?.content?.trim() ?? "";
-}
 
 export const offlineAssist = ({
   fieldKey,
@@ -71,12 +30,6 @@ export const offlineAssist = ({
 export const requestAiAssist = async (
   params: AiAssistRequest
 ): Promise<string> => {
-  const controller = new AbortController();
-  const timeout = setTimeout(
-    () => controller.abort(),
-    OPENAI_DEFAULTS.timeoutMs
-  );
-
   const prompt = params.sourceText?.trim()
     ? buildRefinePrompt({
         ...params,
@@ -89,21 +42,29 @@ export const requestAiAssist = async (
       return offlineAssist(params);
     }
 
-    const result = await chatComplete({
+    const request: OpenAiChatRequest = {
       messages: [
         { role: "system", content: systemPrompt(params.language) },
         { role: "user", content: prompt },
       ],
-      signal: controller.signal,
       maxTokens: OPENAI_DEFAULTS.maxTokens,
       temperature: OPENAI_DEFAULTS.temperature,
-    });
+      timeoutMs: OPENAI_DEFAULTS.timeoutMs,
+    };
+
+    const result = await openAiClient.chat(
+      "ai:assist",
+      request,
+      {
+        fieldKey: params.fieldKey,
+        language: params.language,
+        hasSource: Boolean(params.sourceText?.trim()),
+      }
+    );
 
     return result || offlineAssist(params);
   } catch {
     return offlineAssist(params);
-  } finally {
-    clearTimeout(timeout);
   }
 };
 
@@ -115,16 +76,30 @@ export const translateText = async (
   if (!normalized) return text;
   if (!hasOpenAIKey) return text;
 
-  const output = await chatComplete({
-    messages: [
-      { role: "system", content: systemTranslatePrompt({ target }) },
-      { role: "user", content: userTranslatePrompt({ text: normalized, target }) },
-    ],
-    maxTokens: OPENAI_DEFAULTS.translateMaxTokens,
-    temperature: OPENAI_DEFAULTS.translateTemperature,
-  });
+  try {
+    const request: OpenAiChatRequest = {
+      messages: [
+        { role: "system", content: systemTranslatePrompt({ target }) },
+        {
+          role: "user",
+          content: userTranslatePrompt({ text: normalized, target }),
+        },
+      ],
+      maxTokens: OPENAI_DEFAULTS.translateMaxTokens,
+      temperature: OPENAI_DEFAULTS.translateTemperature,
+      timeoutMs: OPENAI_DEFAULTS.timeoutMs,
+    };
 
-  return output?.trim() || text;
+    const output = await openAiClient.chat(
+      "ai:translate",
+      request,
+      { target }
+    );
+
+    return output?.trim() || text;
+  } catch {
+    return text;
+  }
 };
 
 export { hasOpenAIKey, DEFAULT_MODEL } from "@/constants/ai";

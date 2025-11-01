@@ -49,7 +49,7 @@ export const StepNavigation = ({
         type="button"
         onClick={onNext}
         className={`flex items-center gap-2 w-full sm:w-auto ${
-          isRTL ? "flex-row-reversed" : ""
+          isRTL ? "flex-row-reverse" : ""
         }`}
       >
         <span>{labels.next}</span>

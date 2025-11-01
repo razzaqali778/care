@@ -1,9 +1,10 @@
-import { Controller, type Control } from "react-hook-form";
+import { type Control } from "react-hook-form";
 import {
   FormItem,
   FormLabel,
   FormControl,
   FormMessage,
+  FormField,
 } from "@/components/ui/form";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { isRTL as isRTLLang } from "@/constants/lang";
@@ -66,10 +67,10 @@ export function PhoneNumberField({
   const defaultCountry = (countryIso2 || "SA").toLowerCase() as any;
 
   return (
-    <Controller
+    <FormField
       control={control}
       name={name}
-      render={({ field, fieldState }) => {
+      render={({ field }) => {
         // Normalize once on hydration or when country changes,
         // but only if current value lacks '+' (i.e., stored as local number).
         React.useEffect(() => {
@@ -119,7 +120,7 @@ export function PhoneNumberField({
                 />
               </div>
             </FormControl>
-            <FormMessage>{fieldState.error?.message}</FormMessage>
+            <FormMessage />
           </FormItem>
         );
       }}

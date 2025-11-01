@@ -58,7 +58,7 @@ export const useApplicationStepper = ({
   const form = useForm<SubmissionForm>({
     resolver,
     mode: "onSubmit",
-    reValidateMode: "onBlur",
+    reValidateMode: "onChange",
     shouldFocusError: true,
     criteriaMode: "firstError",
     defaultValues: FORM_DEFAULTS,
@@ -68,6 +68,21 @@ export const useApplicationStepper = ({
 
   const currentFields = useMemo(() => FIELDS_BY_STEP[stepKey], [stepKey]);
   const isLastStep = stepIndex >= totalSteps - 1;
+
+  const markStepFieldsTouched = useCallback(
+    (fields: readonly (keyof SubmissionForm)[]) => {
+      fields.forEach((fieldName) => {
+        const path = fieldName as Path<SubmissionForm>;
+        const currentValue = form.getValues(path);
+        form.setValue(path, currentValue, {
+          shouldDirty: false,
+          shouldTouch: true,
+          shouldValidate: false,
+        });
+      });
+    },
+    [form]
+  );
 
   useEffect(() => {
     const activeFields = FIELDS_BY_STEP[stepKey];
@@ -98,7 +113,10 @@ export const useApplicationStepper = ({
 
   const validateCurrentStep = useCallback(async () => {
     const ok = await form.trigger(currentFields as any, { shouldFocus: true });
-    if (!ok) return false;
+    if (!ok) {
+      markStepFieldsTouched(currentFields);
+      return false;
+    }
     try {
       const values = form.getValues();
       if (stepKey === "personal") await personalInfoSchema.parseAsync(values);
@@ -110,7 +128,7 @@ export const useApplicationStepper = ({
     } catch {
       return false;
     }
-  }, [currentFields, form, stepKey]);
+  }, [currentFields, form, markStepFieldsTouched, stepKey]);
 
   const nextStep = useCallback(async () => {
     const ok = await validateCurrentStep();

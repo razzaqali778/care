@@ -164,13 +164,20 @@ export function PersonalInfoStep({ form }: PersonalInfoStepProps) {
                 value={field.value ?? ""}
                 onValueChange={(v) => {
                   field.onChange(v);
-                  form.setValue(FORM_FIELDS.state, "");
-                  form.setValue(FORM_FIELDS.city, "");
-                  form.trigger([
-                    FORM_FIELDS.country,
-                    FORM_FIELDS.state,
-                    FORM_FIELDS.city,
-                  ]);
+                  form.resetField(FORM_FIELDS.state, {
+                    defaultValue: "",
+                    keepDirty: false,
+                    keepTouched: false,
+                    keepError: false,
+                  });
+                  form.resetField(FORM_FIELDS.city, {
+                    defaultValue: "",
+                    keepDirty: false,
+                    keepTouched: false,
+                    keepError: false,
+                  });
+                  form.clearErrors([FORM_FIELDS.state, FORM_FIELDS.city]);
+                  form.trigger(FORM_FIELDS.country);
                 }}
               >
                 <FormControl>
@@ -203,8 +210,14 @@ export function PersonalInfoStep({ form }: PersonalInfoStepProps) {
                 value={field.value ?? ""}
                 onValueChange={(v) => {
                   field.onChange(v);
-                  form.setValue(FORM_FIELDS.city, "");
-                  form.trigger([FORM_FIELDS.state, FORM_FIELDS.city]);
+                  form.resetField(FORM_FIELDS.city, {
+                    defaultValue: "",
+                    keepDirty: false,
+                    keepTouched: false,
+                    keepError: false,
+                  });
+                  form.clearErrors([FORM_FIELDS.city]);
+                  form.trigger(FORM_FIELDS.state);
                 }}
                 disabled={!countryCode}
               >

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ReloadIcon as Reload } from "@radix-ui/react-icons";
 import { PenTool, Edit3, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { makeAssistLabels } from "@/constants/assist";
-import { toApiLang, type SupportedLang } from "@/constants/lang";
+import { toApiLang, type SupportedLang, isRTL as isRTLLang } from "@/constants/lang";
 import { toApplicationState } from "@/utility/AppState";
 import type { AiAssistProps } from "@/features/assist/types";
 import { requestAiAssist } from "@/features/assist/services/aiAssist";
@@ -30,35 +30,46 @@ export const AiAssistDialog = ({
   const [value, setValue] = useState("");
   const [editable, setEditable] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const autoRequestedRef = useRef(false);
 
   const lang = toApiLang(language as SupportedLang);
+  const isRTL = isRTLLang(language as SupportedLang);
 
-  const generate = async (seed?: string) => {
-    setError(null);
-    setLoading(true);
-    try {
-      const draft = await requestAiAssist({
-        fieldKey,
-        application: toApplicationState(form.getValues()),
-        language: lang,
-        sourceText: seed && seed.trim() ? seed : undefined,
-      });
-      setValue(draft.trim());
-      setEditable(false);
-    } catch (err: any) {
-      setError(err?.message || labels.error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const generate = useCallback(
+    async (seed?: string) => {
+      setError(null);
+      setLoading(true);
+      try {
+        const draft = await requestAiAssist({
+          fieldKey,
+          application: toApplicationState(form.getValues()),
+          language: lang,
+          sourceText: seed && seed.trim() ? seed : undefined,
+        });
+        setValue(draft.trim());
+        setEditable(false);
+      } catch (err: any) {
+        setError(err?.message || labels.error);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [fieldKey, form, lang, labels.error]
+  );
 
   const handleOpen = () => {
-    setOpen(true);
+    autoRequestedRef.current = false;
     const seed = (form.getValues()[targetField] || "") as string;
-    setValue(seed);
     setEditable(false);
     setError(null);
-    void generate(seed);
+    setOpen(true);
+    if (seed.trim()) {
+      setValue(seed);
+      return;
+    }
+    if (value.trim()) {
+      return;
+    }
   };
 
   const handleInsert = () => {
@@ -75,8 +86,12 @@ export const AiAssistDialog = ({
   useEffect(() => {
     if (!open) return;
     const seed = (form.getValues()[targetField] || "") as string;
-    void generate(seed);
-  }, [language]);
+    if (seed.trim()) return;
+    if (value.trim()) return;
+    if (autoRequestedRef.current) return;
+    autoRequestedRef.current = true;
+    void generate();
+  }, [form, generate, language, open, targetField, value]);
 
   return (
     <>
@@ -85,7 +100,9 @@ export const AiAssistDialog = ({
         variant="outline"
         size="sm"
         onClick={handleOpen}
-        className="flex items-center gap-2"
+        className={`flex items-center gap-2 ${
+          isRTL ? "flex-row-reverse" : ""
+        }`}
       >
         <PenTool className="h-4 w-4" />
         {labels.help}
@@ -129,7 +146,9 @@ export const AiAssistDialog = ({
                   generate(form.getValues()[targetField] as string)
                 }
                 disabled={loading}
-                className="gap-2"
+                className={`flex items-center gap-2 ${
+                  isRTL ? "flex-row-reverse" : ""
+                }`}
               >
                 <Reload className="h-4 w-4" />
                 {labels.regenerate}
@@ -140,7 +159,9 @@ export const AiAssistDialog = ({
                   variant="secondary"
                   onClick={() => setEditable((state) => !state)}
                   disabled={!value || loading}
-                  className="gap-2"
+                  className={`flex items-center gap-2 ${
+                    isRTL ? "flex-row-reverse" : ""
+                  }`}
                 >
                   {editable ? (
                     <Check className="h-4 w-4" />
@@ -154,7 +175,9 @@ export const AiAssistDialog = ({
                   variant="outline"
                   onClick={() => setOpen(false)}
                   disabled={loading}
-                  className="gap-2"
+                  className={`flex items-center gap-2 ${
+                    isRTL ? "flex-row-reverse" : ""
+                  }`}
                 >
                   <X className="h-4 w-4" />
                   {labels.discard}

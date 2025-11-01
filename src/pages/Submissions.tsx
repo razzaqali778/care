@@ -12,7 +12,9 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { FileText, ArrowLeft, Pencil, Trash2 } from "lucide-react";
+import { isRTL as isRTLLang } from "@/constants/lang";
+import { iconSpacing } from "@/utility/Rtl";
+import { FileText, ArrowLeft, ArrowRight, Pencil, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/useToast";
 import { api } from "@/lib/Api";
@@ -23,9 +25,10 @@ const DELETE_CONFIRM_FALLBACK =
 
 export default function Submissions() {
   const navigate = useNavigate();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { toast } = useToast();
   const qc = useQueryClient();
+  const isRTL = isRTLLang(language);
 
   const { data: submissions = [] } = useQuery({
     queryKey: ["submissions"],
@@ -70,9 +73,16 @@ export default function Submissions() {
           <Button
             variant="outline"
             onClick={() => navigate("/")}
-            className="flex items-center gap-2 mb-4 w-full sm:w-auto"
+            className={`flex items-center gap-2 mb-4 w-full sm:w-auto ${
+              isRTL ? "flex-row-reverse" : ""
+            }`}
           >
-            <ArrowLeft className="h-4 w-4" /> {t("submissions.backToHome")}
+            {isRTL ? (
+              <ArrowRight className="h-4 w-4" />
+            ) : (
+              <ArrowLeft className="h-4 w-4" />
+            )}{" "}
+            {t("submissions.backToHome")}
           </Button>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
@@ -94,8 +104,15 @@ export default function Submissions() {
 
         <Card className="shadow-medium">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
-              <FileText className="h-5 w-5" /> {t("submissions.title")}
+            <CardTitle
+              className={`flex items-center gap-2 text-lg sm:text-xl ${
+                isRTL ? "flex-row-reverse" : ""
+              }`}
+            >
+              <FileText
+                className={`${iconSpacing(isRTL, "start")} h-5 w-5`}
+              />{" "}
+              {t("submissions.title")}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -169,13 +186,17 @@ export default function Submissions() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="flex items-center gap-1"
+                              className={`flex items-center gap-1 ${
+                                isRTL ? "flex-row-reverse" : ""
+                              }`}
                               onClick={() => handleEdit(r.id)}
                               title={
                                 t("submissions.actions.edit") || "Edit"
                               }
                             >
-                              <Pencil className="h-4 w-4" />
+                              <Pencil
+                                className={`${iconSpacing(isRTL, "start")} h-4 w-4`}
+                              />
                               <span className="hidden sm:inline">
                                 {t("submissions.actions.edit")}
                               </span>
@@ -183,13 +204,17 @@ export default function Submissions() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="flex items-center gap-1 text-destructive"
+                              className={`flex items-center gap-1 text-destructive ${
+                                isRTL ? "flex-row-reverse" : ""
+                              }`}
                               onClick={() => handleDelete(r.id)}
                               title={
                                 t("submissions.actions.delete") || "Delete"
                               }
                             >
-                              <Trash2 className="h-4 w-4" />
+                              <Trash2
+                                className={`${iconSpacing(isRTL, "start")} h-4 w-4`}
+                              />
                               <span className="hidden sm:inline">
                                 {t("submissions.actions.delete")}
                               </span>

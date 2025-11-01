@@ -80,10 +80,7 @@ export const api = {
       payload
     );
   },
-  update(
-    id: string,
-    payload: SubmissionForm
-  ): Promise<Submission | undefined> {
+  update(id: string, payload: SubmissionForm): Promise<Submission | undefined> {
     return exec(
       "update",
       async () => {
